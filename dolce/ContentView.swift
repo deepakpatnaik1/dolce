@@ -11,33 +11,29 @@ struct ContentView: View {
     @StateObject private var messageStore = MessageStore()
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Message list (temporary simple version)
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 16) {
-                    ForEach(messageStore.messages) { message in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(message.displayAuthor)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text(message.content)
-                                .font(.body)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal)
+        ZStack {
+            // Background color using DesignTokens
+            Color(
+                red: DesignTokens.shared.background.primary.red,
+                green: DesignTokens.shared.background.primary.green,
+                blue: DesignTokens.shared.background.primary.blue
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Beautiful ScrollbackView with glassmorphic styling
+                ScrollbackView(messages: messageStore.messages)
+                
+                // Simple input bar (temporary)
+                HStack {
+                    TextField("Ask anything...", text: .constant(""))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    Button("Send") {
+                        // TODO: Connect to real input handling
                     }
                 }
+                .padding()
             }
-            
-            // Simple input bar (temporary)
-            HStack {
-                TextField("Type a message...", text: .constant(""))
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                Button("Send") {
-                    // TODO: Connect to real input handling
-                }
-            }
-            .padding()
         }
         .onAppear {
             messageStore.loadSampleMessages()
@@ -47,4 +43,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .frame(width: 1000, height: 700)
 }
