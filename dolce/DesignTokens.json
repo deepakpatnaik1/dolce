@@ -77,10 +77,15 @@
           "cornerRadius": 8,
           "accentColors": {
             "boss": {"red": 0.4, "green": 0.7, "blue": 0.9},
+            "claude": {"red": 0.9, "green": 0.7, "blue": 0.5},
+            "samara": {"red": 0.5, "green": 0.8, "blue": 0.6},
             "vanessa": {"red": 0.8, "green": 0.6, "blue": 0.4},
             "vlad": {"red": 0.7, "green": 0.5, "blue": 0.8},
-            "samara": {"red": 0.5, "green": 0.8, "blue": 0.6},
-            "claude": {"red": 0.9, "green": 0.7, "blue": 0.5}
+            "lyra": {"red": 0.9, "green": 0.6, "blue": 0.9},
+            "eva": {"red": 0.6, "green": 0.9, "blue": 0.8},
+            "alicja": {"red": 0.8, "green": 0.8, "blue": 0.4},
+            "sonja": {"red": 0.9, "green": 0.5, "blue": 0.6},
+            "gunnar": {"red": 0.5, "green": 0.6, "blue": 0.9}
           }
         },
         "coloredBorder": {
