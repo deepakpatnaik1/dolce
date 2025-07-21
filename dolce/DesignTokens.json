@@ -146,9 +146,9 @@
   },
   "background": {
     "primary": {
-      "red": 0.08,
-      "green": 0.08,
-      "blue": 0.09
+      "red": 0.04,
+      "green": 0.04,
+      "blue": 0.05
     }
   }
 }
