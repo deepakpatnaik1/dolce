@@ -23,16 +23,10 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 // Beautiful ScrollbackView with glassmorphic styling
                 ScrollbackView(messages: messageStore.messages)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
-                // Simple input bar (temporary)
-                HStack {
-                    TextField("Ask anything...", text: .constant(""))
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    Button("Send") {
-                        // TODO: Connect to real input handling
-                    }
-                }
-                .padding()
+                // Beautiful InputBarView with glassmorphic styling
+                InputBarView(messageStore: messageStore)
             }
         }
         .onAppear {
