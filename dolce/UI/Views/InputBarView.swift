@@ -17,12 +17,12 @@ struct InputBarView: View {
     @State private var inputText: String = ""
     @State private var textHeight: CGFloat
     @FocusState private var isInputFocused: Bool
-    @ObservedObject var messageStore: MessageStore
+    @ObservedObject var conversationOrchestrator: ConversationOrchestrator
     
     private let tokens = DesignTokens.shared
     
-    init(messageStore: MessageStore) {
-        self.messageStore = messageStore
+    init(conversationOrchestrator: ConversationOrchestrator) {
+        self.conversationOrchestrator = conversationOrchestrator
         
         // Calculate single-line height for initial state
         let font = NSFont(name: DesignTokens.shared.typography.bodyFont, size: 12) ?? NSFont.systemFont(ofSize: 12)
@@ -141,7 +141,10 @@ struct InputBarView: View {
         
         let messageToSend = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         inputText = ""
-        messageStore.addMessage(ChatMessage(content: messageToSend, author: "User", persona: nil))
+        
+        Task {
+            await conversationOrchestrator.sendMessage(messageToSend)
+        }
     }
     
     private func updateTextHeight(for text: String) {

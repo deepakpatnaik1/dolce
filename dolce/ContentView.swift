@@ -9,6 +9,13 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var messageStore = MessageStore()
+    @StateObject private var conversationOrchestrator: ConversationOrchestrator
+    
+    init() {
+        let messageStore = MessageStore()
+        self._messageStore = StateObject(wrappedValue: messageStore)
+        self._conversationOrchestrator = StateObject(wrappedValue: ConversationOrchestrator(messageStore: messageStore))
+    }
     
     var body: some View {
         ZStack {
@@ -26,7 +33,7 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 // Beautiful InputBarView with glassmorphic styling
-                InputBarView(messageStore: messageStore)
+                InputBarView(conversationOrchestrator: conversationOrchestrator)
             }
         }
         .onAppear {
