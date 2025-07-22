@@ -18,6 +18,7 @@ import Foundation
 struct APIConfiguration {
     let provider: APIProvider
     let baseURL: String
+    let endpoint: String
     let apiKey: String
     let model: String
     let maxTokens: Int
@@ -44,6 +45,7 @@ struct APIConfigurationProvider {
         return APIConfiguration(
             provider: .anthropic,
             baseURL: "https://api.anthropic.com/v1",
+            endpoint: "/messages",
             apiKey: apiKey,
             model: "claude-3-5-sonnet-20241022",
             maxTokens: 1000,
@@ -60,8 +62,9 @@ struct APIConfigurationProvider {
         return APIConfiguration(
             provider: .openai,
             baseURL: "https://api.openai.com/v1",
+            endpoint: "/chat/completions",
             apiKey: apiKey,
-            model: "gpt-4o",
+            model: "gpt-4.1-mini-2025-04-14",
             maxTokens: 1000,
             headers: ["Authorization": "Bearer \(apiKey)"]
         )
@@ -76,6 +79,7 @@ struct APIConfigurationProvider {
         return APIConfiguration(
             provider: .fireworks,
             baseURL: "https://api.fireworks.ai/inference/v1",
+            endpoint: "/chat/completions",
             apiKey: apiKey,
             model: "llama-3-1-405b",
             maxTokens: 1000,
@@ -89,8 +93,19 @@ struct APIConfigurationProvider {
             return nil
         }
         
-        // Extract provider ID from model key
-        let providerId = extractProviderId(from: modelKey)
+        // Get provider ID string from the model's provider enum
+        let providerId: String
+        switch model.provider {
+        case .anthropic:
+            providerId = "anthropic"
+        case .openai:
+            providerId = "openai"
+        case .fireworks:
+            providerId = "fireworks"
+        case .local:
+            providerId = "local"
+        }
+        
         guard let providerConfig = ModelProvider.getProviderConfig(for: providerId) else {
             return nil
         }
@@ -123,6 +138,7 @@ struct APIConfigurationProvider {
         return APIConfiguration(
             provider: model.provider,
             baseURL: providerConfig.baseURL,
+            endpoint: providerConfig.endpoint,
             apiKey: apiKey,
             model: extractModelId(from: modelKey),
             maxTokens: model.maxTokens,

@@ -72,7 +72,7 @@ struct InputBarView: View {
                 .buttonStyle(PlainButtonStyle())
                 
                 // Model picker
-                ModelPickerView(conversationOrchestrator: conversationOrchestrator)
+                ModelPickerView()
                 
                 Spacer()
                 

@@ -17,11 +17,10 @@ import SwiftUI
 @MainActor
 class ConversationOrchestrator: ObservableObject {
     private let messageStore: MessageStore
-    @Published var selectedModelKey: String?
+    private let runtimeModelManager = RuntimeModelManager.shared
     
     init(messageStore: MessageStore) {
         self.messageStore = messageStore
-        self.selectedModelKey = ModelProvider.getDefaultModel()?.key
     }
     
     // MARK: - Public Interface
@@ -46,32 +45,18 @@ class ConversationOrchestrator: ObservableObject {
         return APIConfigurationProvider.getConfigurationStatus()
     }
     
-    /// Change selected model
-    func selectModel(_ modelKey: String) {
-        selectedModelKey = modelKey
-    }
-    
-    /// Get currently selected model
-    func getSelectedModel() -> LLMModel? {
-        guard let selectedModelKey = selectedModelKey else { return nil }
-        return ModelProvider.getModel(for: selectedModelKey)
-    }
     
     // MARK: - Private Orchestration
     
     /// Orchestrate AI response generation
     private func getAIResponse(for userMessage: String, persona: String) async {
         do {
-            // Get configuration for selected model
-            let config: APIConfiguration?
-            if let selectedModelKey = selectedModelKey {
-                config = APIConfigurationProvider.getConfigForModel(selectedModelKey)
-            } else {
-                config = APIConfigurationProvider.getDefaultConfig()
-            }
+            // Get configuration for selected model from RuntimeModelManager
+            let selectedModelKey = runtimeModelManager.selectedModel
+            let config = APIConfigurationProvider.getConfigForModel(selectedModelKey)
             
             guard let config = config else {
-                addErrorMessage("No API configuration available")
+                addErrorMessage("No API configuration available for model: \(selectedModelKey)")
                 return
             }
             
@@ -106,6 +91,7 @@ class ConversationOrchestrator: ObservableObject {
         
         return try HTTPRequestBuilder.buildRequest(
             baseURL: config.baseURL,
+            endpoint: config.endpoint,
             apiKey: config.apiKey,
             requestBody: requestBody,
             headers: config.headers

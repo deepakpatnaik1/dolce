@@ -16,6 +16,7 @@ import Foundation
 // MARK: - Configuration Data Models
 
 struct ModelsConfiguration: Codable {
+    let defaultModel: String?
     let providers: [String: ProviderConfiguration]
     
     static let shared: ModelsConfiguration = {
@@ -51,3 +52,6 @@ struct ModelConfiguration: Codable {
     let maxTokens: Int
     let isLocal: Bool?
 }
+
+// Type alias for clarity
+typealias Model = ModelConfiguration

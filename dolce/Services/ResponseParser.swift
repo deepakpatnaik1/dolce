@@ -96,12 +96,14 @@ struct ResponseParser {
                 return StreamingChunk(content: nil, isComplete: false, error: "Invalid JSON")
             }
             
-            // Extract content from choices
+            // Extract content from choices (handle null content gracefully)
             if let choices = json["choices"] as? [[String: Any]],
                let firstChoice = choices.first,
-               let delta = firstChoice["delta"] as? [String: Any],
-               let content = delta["content"] as? String {
-                return StreamingChunk(content: content, isComplete: false, error: nil)
+               let delta = firstChoice["delta"] as? [String: Any] {
+                let content = delta["content"] as? String
+                if content != nil {
+                    return StreamingChunk(content: content, isComplete: false, error: nil)
+                }
             }
             
             // Check for completion
@@ -180,10 +182,3 @@ struct ResponseParser {
 }
 
 // MARK: - Supporting Types
-
-enum APIProvider {
-    case anthropic
-    case openai
-    case fireworks
-    case local
-}

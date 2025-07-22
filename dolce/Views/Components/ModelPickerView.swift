@@ -15,17 +15,16 @@ import SwiftUI
 
 struct ModelPickerView: View {
     @State private var showDropdown = false
-    @ObservedObject var conversationOrchestrator: ConversationOrchestrator
+    @ObservedObject private var runtimeModelManager = RuntimeModelManager.shared
     
     private let availableModels: [LLMModel]
     
-    init(conversationOrchestrator: ConversationOrchestrator) {
-        self.conversationOrchestrator = conversationOrchestrator
+    init() {
         self.availableModels = ModelProvider.getAvailableModels()
     }
     
     private var selectedModel: LLMModel? {
-        conversationOrchestrator.getSelectedModel()
+        availableModels.first { $0.key == runtimeModelManager.selectedModel }
     }
     
     var body: some View {
@@ -125,16 +124,13 @@ struct ModelPickerView: View {
     // MARK: - Actions
     
     private func selectModel(_ model: LLMModel) {
-        conversationOrchestrator.selectModel(model.key)
+        runtimeModelManager.selectModel(model.key)
         showDropdown = false
     }
 }
 
 #Preview {
-    let messageStore = MessageStore()
-    let orchestrator = ConversationOrchestrator(messageStore: messageStore)
-    
-    return ModelPickerView(conversationOrchestrator: orchestrator)
+    return ModelPickerView()
         .padding()
         .background(Color.black)
 }

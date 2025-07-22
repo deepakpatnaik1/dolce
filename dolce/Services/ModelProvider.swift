@@ -13,6 +13,15 @@
 
 import Foundation
 
+// MARK: - API Provider Types
+
+enum APIProvider {
+    case anthropic
+    case openai
+    case fireworks
+    case local
+}
+
 // MARK: - Data Models
 
 struct LLMModel {

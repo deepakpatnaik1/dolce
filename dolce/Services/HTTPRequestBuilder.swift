@@ -27,8 +27,8 @@ struct HTTPRequestBuilder {
         // Validate inputs
         try validateInputs(baseURL: baseURL, apiKey: apiKey, requestBody: requestBody)
         
-        // Build URL - determine endpoint based on provider if not specified
-        let finalEndpoint = endpoint ?? determineEndpoint(from: requestBody)
+        // Build URL - use provided endpoint (required for proper routing)
+        let finalEndpoint = endpoint ?? "/messages"
         let url = try buildURL(baseURL: baseURL, endpoint: finalEndpoint)
         
         // Create request
@@ -76,14 +76,6 @@ struct HTTPRequestBuilder {
         }
     }
     
-    private static func determineEndpoint(from requestBody: [String: Any]) -> String {
-        // Check if this looks like an Anthropic request (has "messages" field)
-        if requestBody["messages"] != nil {
-            return "/messages"
-        }
-        // Default to OpenAI/Fireworks format
-        return "/chat/completions"
-    }
 }
 
 // MARK: - Error Types
