@@ -72,21 +72,27 @@ final class TurnManager: ObservableObject {
     
     func setTurnIndex(_ index: Int, totalTurns: Int) {
         let clampedIndex = max(0, min(index, totalTurns - 1))
-        self.currentTurnIndex = clampedIndex
-        self.totalTurns = totalTurns
+        DispatchQueue.main.async {
+            self.currentTurnIndex = clampedIndex
+            self.totalTurns = totalTurns
+        }
     }
     
     func enterTurnMode(startingAtLatest totalTurns: Int) {
-        self.isInTurnMode = true
-        self.totalTurns = totalTurns
-        // Start at latest turn (last index)
-        self.currentTurnIndex = max(0, totalTurns - 1)
+        DispatchQueue.main.async {
+            self.isInTurnMode = true
+            self.totalTurns = totalTurns
+            // Start at latest turn (last index)
+            self.currentTurnIndex = max(0, totalTurns - 1)
+        }
     }
     
     func exitTurnMode() {
-        self.isInTurnMode = false
-        self.currentTurnIndex = 0
-        self.totalTurns = 0
+        DispatchQueue.main.async {
+            self.isInTurnMode = false
+            self.currentTurnIndex = 0
+            self.totalTurns = 0
+        }
     }
     
     // MARK: - Turn Information
