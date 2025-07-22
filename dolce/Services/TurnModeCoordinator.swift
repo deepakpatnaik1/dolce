@@ -38,12 +38,17 @@ final class TurnModeCoordinator: ObservableObject {
     
     /// Handle keyboard command for turn mode
     func handleKeyboardCommand(_ action: TurnKeyboardRouter.TurnKeyboardAction, messages: [ChatMessage]) {
+        print("[TurnModeCoordinator] Handling keyboard command: \(action)")
+        
         switch action {
         case .navigateUp:
+            print("[TurnModeCoordinator] Processing navigateUp")
             navigateUp(messages: messages)
         case .navigateDown:
+            print("[TurnModeCoordinator] Processing navigateDown")
             navigateDown(messages: messages)
         case .exitTurnMode:
+            print("[TurnModeCoordinator] Processing exitTurnMode")
             exitTurnMode()
         case .ignore:
             break // No action needed
@@ -62,14 +67,18 @@ final class TurnModeCoordinator: ObservableObject {
     // MARK: - Private Navigation Coordination
     
     private func navigateUp(messages: [ChatMessage]) {
+        print("[TurnModeCoordinator] navigateUp - isInTurnMode: \(turnManager.isInTurnMode)")
+        
         // If not in turn mode, enter turn mode at latest turn first
         if !turnManager.isInTurnMode {
+            print("[TurnModeCoordinator] Not in turn mode, entering turn mode")
             enterTurnMode(messages: messages)
             return
         }
         
         // Already in turn mode - navigate up
         let turns = turnManager.calculateTurns(from: messages)
+        print("[TurnModeCoordinator] Already in turn mode - currentIndex: \(turnManager.currentTurnIndex), totalTurns: \(turns.count)")
         
         let result = TurnNavigator.navigate(
             from: turnManager.currentTurnIndex,
@@ -77,10 +86,14 @@ final class TurnModeCoordinator: ObservableObject {
             direction: .up
         )
         
+        print("[TurnModeCoordinator] Navigation result: \(result)")
+        
         switch result {
         case .moved(let newIndex):
+            print("[TurnModeCoordinator] Moving to turn index: \(newIndex)")
             turnManager.setTurnIndex(newIndex, totalTurns: turns.count)
         case .boundaryReached, .noTurnsAvailable:
+            print("[TurnModeCoordinator] Navigation boundary reached or no turns available")
             break // Stay at current position
         }
     }
