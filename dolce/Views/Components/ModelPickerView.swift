@@ -16,11 +16,11 @@ import SwiftUI
 struct ModelPickerView: View {
     @State private var showDropdown = false
     @ObservedObject private var runtimeModelManager = RuntimeModelManager.shared
+    @ObservedObject private var localModelDetector = LocalModelDetector.shared
     
-    private let availableModels: [LLMModel]
-    
-    init() {
-        self.availableModels = ModelProvider.getAvailableModels()
+    private var availableModels: [LLMModel] {
+        // Refresh available models to include newly detected local models
+        return ModelProvider.getAvailableModels()
     }
     
     private var selectedModel: LLMModel? {
@@ -37,6 +37,8 @@ struct ModelPickerView: View {
         }
         .onTapGesture {
             if !showDropdown {
+                // Refresh local models when opening dropdown
+                localModelDetector.refresh()
                 showDropdown.toggle()
             }
         }

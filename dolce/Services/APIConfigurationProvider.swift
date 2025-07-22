@@ -38,6 +38,7 @@ struct APIConfigurationProvider {
     
     
     /// Get API configuration for specific model
+    @MainActor
     static func getConfigForModel(_ modelKey: String) -> APIConfiguration? {
         guard let model = ModelProvider.getModel(for: modelKey) else {
             return nil
@@ -52,6 +53,8 @@ struct APIConfigurationProvider {
             providerId = "openai"
         case .fireworks:
             providerId = "fireworks"
+        case .ollama:
+            providerId = "ollama"
         case .local:
             providerId = "local"
         }
@@ -64,8 +67,8 @@ struct APIConfigurationProvider {
         var headers = providerConfig.additionalHeaders ?? [:]
         var apiKey = ""
         
-        if providerId == "local" {
-            // Local models don't need authentication
+        if providerId == "local" || providerId == "ollama" {
+            // Local and Ollama models don't need authentication
             apiKey = "local"
         } else if let apiKeyId = providerConfig.apiKeyIdentifier,
                   let authHeader = providerConfig.authHeader {
@@ -97,6 +100,7 @@ struct APIConfigurationProvider {
     }
     
     /// Get default API configuration
+    @MainActor
     static func getDefaultConfig() -> APIConfiguration? {
         // Use the default model from configuration
         guard let defaultModel = ModelsConfiguration.shared.defaultModel else {
@@ -116,11 +120,13 @@ struct APIConfigurationProvider {
     }
     
     /// Check if API configuration is valid
+    @MainActor
     static func isConfigurationValid() -> Bool {
         return getDefaultConfig() != nil
     }
     
     /// Get human-readable configuration status
+    @MainActor
     static func getConfigurationStatus() -> String {
         if getDefaultConfig() != nil {
             return "API configured"

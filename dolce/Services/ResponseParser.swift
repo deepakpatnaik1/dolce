@@ -161,6 +161,8 @@ struct ResponseParser {
             return parseOpenAIStreamingLine(line)
         case .fireworks:
             return parseOpenAIStreamingLine(line) // Fireworks uses OpenAI format
+        case .ollama:
+            return parseOpenAIStreamingLine(line) // Ollama uses OpenAI-compatible format
         case .local:
             return parseLocalStreamingLine(line) // Local models need special handling
         }
@@ -175,6 +177,8 @@ struct ResponseParser {
             return parseOpenAIResponse(data)
         case .fireworks:
             return parseOpenAIResponse(data) // Fireworks uses OpenAI format
+        case .ollama:
+            return parseOpenAIResponse(data) // Ollama uses OpenAI-compatible format
         case .local:
             return parseLocalResponse(data) // Local models need special handling
         }
