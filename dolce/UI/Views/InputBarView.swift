@@ -45,14 +45,19 @@ struct InputBarView: View {
                     .padding(.top, tokens.elements.inputBar.topPadding)
                     .padding(.bottom, tokens.elements.inputBar.topPadding)
                     .onSubmit {
-                        // Handle regular Enter as new line
+                        // Disabled - handled by onKeyPress
                     }
                     .onKeyPress(keys: [.return]) { keyPress in
-                        if keyPress.modifiers.contains(.command) {
+                        switch KeyboardCommandRouter.routeKeyPress(keyPress) {
+                        case .sendMessage:
                             sendMessage()
                             return .handled
+                        case .addNewLine:
+                            // Let TextField handle naturally for new line
+                            return .ignored
+                        case .ignore:
+                            return .ignored
                         }
-                        return .ignored
                     }
                     .onChange(of: focusGuardian.shouldFocusInput) { _, should in
                         if should { 
