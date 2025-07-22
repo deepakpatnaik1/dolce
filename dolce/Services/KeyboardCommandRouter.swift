@@ -27,26 +27,18 @@ struct KeyboardCommandRouter {
     
     /// Route keyboard event to appropriate action
     static func routeKeyPress(_ keyPress: KeyPress) -> KeyboardAction {
-        print("[KeyboardCommandRouter] KeyPress - key: \(keyPress.key), modifiers: \(keyPress.modifiers)")
-        
         switch (keyPress.key, keyPress.modifiers) {
         case (.return, []):           // Enter alone → send message
-            print("[KeyboardCommandRouter] Enter -> sendMessage")
             return .sendMessage
         case (.return, [.option]):    // Option+Enter → add new line
-            print("[KeyboardCommandRouter] Option+Enter -> addNewLine")
             return .addNewLine
         case (.upArrow, let mods) where mods.contains(.option):   // Option+Up → navigate to previous turn
-            print("[KeyboardCommandRouter] Option+Up -> turnNavigateUp")
             return .turnNavigateUp
         case (.downArrow, let mods) where mods.contains(.option): // Option+Down → navigate to next turn
-            print("[KeyboardCommandRouter] Option+Down -> turnNavigateDown")
             return .turnNavigateDown
         case (.escape, []):           // Escape → exit turn mode
-            print("[KeyboardCommandRouter] Escape -> turnModeExit")
             return .turnModeExit
         default:
-            print("[KeyboardCommandRouter] Unhandled key combo -> ignore")
             return .ignore
         }
     }

@@ -154,7 +154,7 @@ struct DesignTokens: Codable {
         
         struct Panes: Codable {
             let spacing: Double
-            let debugSpacing: Double
+            let compactSpacing: Double
             let borderRadius: Double
             let borderOpacity: Double
             let borderWidth: Double

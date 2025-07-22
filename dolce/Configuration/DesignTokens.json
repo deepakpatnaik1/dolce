@@ -117,7 +117,7 @@
     },
     "panes": {
       "spacing": 8,
-      "debugSpacing": 4,
+      "compactSpacing": 4,
       "borderRadius": 8,
       "borderOpacity": 0.2,
       "borderWidth": 1,

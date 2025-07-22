@@ -39,8 +39,6 @@ final class TurnManager: ObservableObject {
         var turnIndex = 0
         var i = 0
         
-        print("[TurnManager] Calculating turns from \(messages.count) messages")
-        
         while i < messages.count {
             let currentMessage = messages[i]
             
@@ -67,7 +65,6 @@ final class TurnManager: ObservableObject {
             i += 1
         }
         
-        print("[TurnManager] Found \(turns.count) turns")
         return turns
     }
     
@@ -75,13 +72,11 @@ final class TurnManager: ObservableObject {
     
     func setTurnIndex(_ index: Int, totalTurns: Int) {
         let clampedIndex = max(0, min(index, totalTurns - 1))
-        print("[TurnManager] Setting turn index: \(index) -> clamped: \(clampedIndex), totalTurns: \(totalTurns)")
         self.currentTurnIndex = clampedIndex
         self.totalTurns = totalTurns
     }
     
     func enterTurnMode(startingAtLatest totalTurns: Int) {
-        print("[TurnManager] Entering turn mode with \(totalTurns) turns")
         self.isInTurnMode = true
         self.totalTurns = totalTurns
         // Start at latest turn (last index)

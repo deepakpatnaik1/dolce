@@ -32,10 +32,7 @@ struct TurnNavigator {
         totalTurns: Int,
         direction: NavigationDirection
     ) -> NavigationResult {
-        print("[TurnNavigator] Navigate from index \(currentTurnIndex) of \(totalTurns) turns, direction: \(direction)")
-        
         guard totalTurns > 0 else {
-            print("[TurnNavigator] No turns available")
             return .noTurnsAvailable
         }
         
@@ -44,19 +41,15 @@ struct TurnNavigator {
         switch direction {
         case .up:
             targetIndex = currentTurnIndex - 1
-            print("[TurnNavigator] Moving up: \(currentTurnIndex) -> \(targetIndex)")
         case .down:
             targetIndex = currentTurnIndex + 1
-            print("[TurnNavigator] Moving down: \(currentTurnIndex) -> \(targetIndex)")
         }
         
         // Check boundaries
         if targetIndex < 0 || targetIndex >= totalTurns {
-            print("[TurnNavigator] Boundary reached - targetIndex: \(targetIndex)")
             return .boundaryReached
         }
         
-        print("[TurnNavigator] Successfully moved to index: \(targetIndex)")
         return .moved(to: targetIndex)
     }
     

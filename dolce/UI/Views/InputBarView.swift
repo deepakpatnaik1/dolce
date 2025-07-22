@@ -59,15 +59,12 @@ struct InputBarView: View {
                             // Let TextField handle naturally for new line
                             return .ignored
                         case .turnNavigateUp:
-                            print("[InputBarView] Received turnNavigateUp action")
                             turnModeCoordinator.handleKeyboardCommand(TurnKeyboardRouter.TurnKeyboardAction.navigateUp, messages: messageStore.messages)
                             return .handled
                         case .turnNavigateDown:
-                            print("[InputBarView] Received turnNavigateDown action")
                             turnModeCoordinator.handleKeyboardCommand(TurnKeyboardRouter.TurnKeyboardAction.navigateDown, messages: messageStore.messages)
                             return .handled
                         case .turnModeExit:
-                            print("[InputBarView] Received turnModeExit action")
                             turnModeCoordinator.handleKeyboardCommand(TurnKeyboardRouter.TurnKeyboardAction.exitTurnMode, messages: messageStore.messages)
                             return .handled
                         case .ignore:

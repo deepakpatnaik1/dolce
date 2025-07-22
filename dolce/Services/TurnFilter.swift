@@ -23,20 +23,15 @@ struct TurnFilter {
         turnIndex: Int,
         isInTurnMode: Bool
     ) -> [ChatMessage] {
-        print("[TurnFilter] Filtering messages - isInTurnMode: \(isInTurnMode), turnIndex: \(turnIndex), totalMessages: \(messages.count)")
-        
         // Normal mode: show all messages
         guard isInTurnMode else {
-            print("[TurnFilter] Not in turn mode - returning all \(messages.count) messages")
             return messages
         }
         
         // Turn mode: show only current turn
         let turns = TurnManager.shared.calculateTurns(from: messages)
-        print("[TurnFilter] In turn mode - found \(turns.count) turns")
         
         guard turnIndex >= 0 && turnIndex < turns.count else {
-            print("[TurnFilter] Invalid turn index \(turnIndex) for \(turns.count) turns")
             return [] // Invalid turn index
         }
         
@@ -47,7 +42,6 @@ struct TurnFilter {
             turnMessages.append(aiMessage)
         }
         
-        print("[TurnFilter] Returning \(turnMessages.count) messages for turn \(turnIndex)")
         return turnMessages
     }
     
