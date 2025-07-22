@@ -43,11 +43,11 @@ struct APIConfigurationProvider {
         
         return APIConfiguration(
             provider: .anthropic,
-            baseURL: "https://api.anthropic.com/v1/messages",
+            baseURL: "https://api.anthropic.com/v1",
             apiKey: apiKey,
-            model: "claude-3-sonnet-20240229",
+            model: "claude-3-5-sonnet-20241022",
             maxTokens: 1000,
-            headers: ["anthropic-version": "2023-06-01"]
+            headers: ["anthropic-version": "2023-06-01", "x-api-key": apiKey]
         )
     }
     

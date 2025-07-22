@@ -18,7 +18,7 @@ struct HTTPRequestBuilder {
     /// Build HTTP request for API calls
     static func buildRequest(
         baseURL: String,
-        endpoint: String = "/chat/completions",
+        endpoint: String = "/messages",
         apiKey: String,
         requestBody: [String: Any],
         headers: [String: String] = [:]
@@ -34,8 +34,7 @@ struct HTTPRequestBuilder {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
-        // Set standard headers
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        // Set standard headers  
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         // Add custom headers

@@ -18,8 +18,8 @@ struct APIKeyManager {
     
     /// Get API key from environment variables or keychain
     static func getAPIKey(for identifier: String) -> String? {
-        // Try environment variable first
-        if let envKey = ProcessInfo.processInfo.environment[identifier], !envKey.isEmpty {
+        // Try .env file and environment variables first
+        if let envKey = EnvFileLoader.getEnvVar(identifier), !envKey.isEmpty {
             return envKey
         }
         

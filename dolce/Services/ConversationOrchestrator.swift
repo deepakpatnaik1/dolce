@@ -80,7 +80,8 @@ class ConversationOrchestrator: ObservableObject {
         let requestBody = RequestBodyBuilder.buildSingleMessageBody(
             message: message,
             model: config.model,
-            maxTokens: config.maxTokens
+            maxTokens: config.maxTokens,
+            streaming: true
         )
         
         return try HTTPRequestBuilder.buildRequest(

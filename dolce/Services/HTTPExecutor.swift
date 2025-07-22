@@ -35,6 +35,7 @@ struct HTTPExecutor {
     /// Execute streaming HTTP request and return String stream
     static func executeStreamingRequest(_ request: URLRequest) async throws -> AsyncThrowingStream<String, Error> {
         
+        
         let (bytes, response) = try await URLSession.shared.bytes(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -75,7 +76,16 @@ struct HTTPExecutor {
 
 // MARK: - Error Types
 
-enum HTTPExecutorError: Error {
+enum HTTPExecutorError: Error, LocalizedError {
     case invalidResponse(String)
     case httpError(Int, String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidResponse(let message):
+            return "Invalid HTTP Response: \(message)"
+        case .httpError(let statusCode, let message):
+            return "HTTP Error \(statusCode): \(message)"
+        }
+    }
 }
