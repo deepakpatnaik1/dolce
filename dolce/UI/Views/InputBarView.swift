@@ -25,9 +25,9 @@ struct InputBarView: View {
     init(conversationOrchestrator: ConversationOrchestrator) {
         self.conversationOrchestrator = conversationOrchestrator
         
-        // Calculate single-line height for initial state
+        // Calculate single-line height for initial state using TextMeasurementEngine
         let font = NSFont(name: DesignTokens.shared.typography.bodyFont, size: 12) ?? NSFont.systemFont(ofSize: 12)
-        let lineHeight = font.ascender + abs(font.descender) + font.leading
+        let lineHeight = TextMeasurementEngine.calculateLineHeight(for: font)
         _textHeight = State(initialValue: lineHeight)
     }
     
@@ -163,53 +163,22 @@ struct InputBarView: View {
     
     private func updateTextHeight(for text: String) {
         let font = NSFont(name: tokens.typography.bodyFont, size: 12) ?? NSFont.systemFont(ofSize: 12)
-        let lineHeight = font.ascender + abs(font.descender) + font.leading
-        
-        // Calculate actual line count
-        let lineCount = getCurrentLineCount(for: text)
-        let newHeight = CGFloat(lineCount) * lineHeight
-        
-        // Update height with smooth animation
-        if abs(textHeight - newHeight) > 2 {
-            withAnimation(.spring(response: 0.1, dampingFraction: 0.8, blendDuration: 0)) {
-                textHeight = newHeight
-            }
-        } else {
-            textHeight = newHeight
-        }
-    }
-    
-    private func getCurrentLineCount(for text: String) -> Int {
-        let font = NSFont(name: tokens.typography.bodyFont, size: 12) ?? NSFont.systemFont(ofSize: 12)
         let contentWidth: CGFloat = tokens.layout.sizing["contentWidth"] ?? 592
-        let textFieldWidth = contentWidth - (tokens.elements.inputBar.textPadding * 2)
+        let availableWidth = contentWidth - (tokens.elements.inputBar.textPadding * 2)
         
-        let height = measureTextHeight(for: text, width: textFieldWidth, font: font)
-        let lineHeight = font.ascender + abs(font.descender) + font.leading
-        
-        return max(1, Int(ceil(height / lineHeight)))
-    }
-    
-    private func measureTextHeight(for text: String, width: CGFloat, font: NSFont) -> CGFloat {
-        let measureText = text.isEmpty ? "Ag" : text
-        
-        let attributedString = NSAttributedString(
-            string: measureText,
-            attributes: [
-                .font: font,
-                .paragraphStyle: {
-                    let style = NSMutableParagraphStyle()
-                    style.lineBreakMode = .byWordWrapping
-                    return style
-                }()
-            ]
+        // Use TextMeasurementEngine for height calculation
+        let newHeight = TextMeasurementEngine.calculateHeight(
+            for: text,
+            font: font, 
+            availableWidth: availableWidth
         )
         
-        let boundingRect = attributedString.boundingRect(
-            with: CGSize(width: width, height: CGFloat.greatestFiniteMagnitude),
-            options: [.usesLineFragmentOrigin, .usesFontLeading]
-        )
-        
-        return ceil(boundingRect.height)
+        // Use HeightAnimationEngine for smooth animation
+        HeightAnimationEngine.animateHeightChange(
+            from: textHeight,
+            to: newHeight
+        ) { [self] height in
+            textHeight = height
+        }
     }
 }
