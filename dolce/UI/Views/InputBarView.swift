@@ -18,6 +18,7 @@ struct InputBarView: View {
     @State private var textHeight: CGFloat
     @FocusState private var isInputFocused: Bool
     @ObservedObject var conversationOrchestrator: ConversationOrchestrator
+    @StateObject private var focusGuardian = FocusGuardian.shared
     
     private let tokens = DesignTokens.shared
     
@@ -52,6 +53,16 @@ struct InputBarView: View {
                             return .handled
                         }
                         return .ignored
+                    }
+                    .onChange(of: focusGuardian.shouldFocusInput) { _, should in
+                        if should { 
+                            isInputFocused = true
+                        }
+                    }
+                    .onChange(of: isInputFocused) { _, focused in
+                        if focused { 
+                            focusGuardian.inputDidReceiveFocus()
+                        }
                     }
             }
             .onChange(of: inputText) { _, newValue in
