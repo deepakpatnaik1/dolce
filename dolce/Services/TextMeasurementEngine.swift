@@ -19,22 +19,25 @@ struct TextMeasurementEngine {
     
     /// Calculate window-aware maximum text area height
     static func calculateMaximumTextHeight() -> CGFloat {
+        let tokens = DesignTokens.shared
+        
         guard let window = NSApplication.shared.windows.first else { 
-            return 400 // Fallback height
+            return CGFloat(tokens.layout.fallbacks["defaultWindowHeight"] ?? 400)
         }
         
         let windowHeight = window.frame.height
         
-        // Calculate total chrome (non-text UI elements)
-        let titleBarHeight: CGFloat = 28 // macOS title bar height
-        let containerPadding: CGFloat = 16 // Input bar padding 
-        let controlsRowHeight: CGFloat = 40 // Bottom controls row height (24px + 4px top + 12px bottom)
-        let textInternalPadding: CGFloat = 24 // Top + bottom text padding
+        // Calculate total chrome using design tokens
+        let titleBarHeight = CGFloat(tokens.layout.chrome["titleBarHeight"] ?? 28)
+        let containerPadding = CGFloat(tokens.layout.chrome["containerPadding"] ?? 16)
+        let controlsRowHeight = CGFloat(tokens.layout.chrome["controlsRowHeight"] ?? 40)
+        let textInternalPadding = CGFloat(tokens.layout.chrome["textInternalPadding"] ?? 24)
         
         let totalChrome = titleBarHeight + (containerPadding * 2) + textInternalPadding + controlsRowHeight
         let availableTextHeight = windowHeight - totalChrome
         
-        return max(200, availableTextHeight) // Minimum 200pt height
+        let minTextHeight = CGFloat(tokens.layout.fallbacks["minTextHeight"] ?? 200)
+        return max(minTextHeight, availableTextHeight)
     }
     
     /// Calculate exact height for given text with constraints applied

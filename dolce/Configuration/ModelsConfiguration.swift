@@ -27,10 +27,9 @@ struct ModelsConfiguration: Codable {
         do {
             let data = try Data(contentsOf: url)
             let configuration = try JSONDecoder().decode(ModelsConfiguration.self, from: data)
-            print("✅ Models configuration loaded successfully")
             return configuration
         } catch {
-            fatalError("❌ Failed to load Models.json: \(error)")
+            fatalError("Failed to load Models.json: \(error)")
         }
     }()
 }

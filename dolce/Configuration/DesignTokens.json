@@ -10,6 +10,16 @@
     "margins": {},
     "sizing": {
       "contentWidth": 592
+    },
+    "chrome": {
+      "titleBarHeight": 28,
+      "containerPadding": 16,
+      "controlsRowHeight": 40,
+      "textInternalPadding": 24
+    },
+    "fallbacks": {
+      "minTextHeight": 200,
+      "defaultWindowHeight": 400
     }
   },
   "glassmorphic": {
@@ -63,6 +73,7 @@
     "scrollback": {
       "bodyFontSize": 12,
       "authorFontSize": 10,
+      "fallbackColor": {"red": 0.3, "green": 0.5, "blue": 0.8},
       "highlight": {
         "fillOpacity": 0.03,
         "borderOpacityMultiplier": 0.5,
@@ -133,6 +144,12 @@
       "scrollDuration": 0.3,
       "smoothScrollIncrement": 40,
       "smoothScrollDuration": 0.25
+    },
+    "textExpansion": {
+      "response": 0.1,
+      "dampingFraction": 0.8,
+      "blendDuration": 0,
+      "animationThreshold": 2
     }
   },
   "pane": {

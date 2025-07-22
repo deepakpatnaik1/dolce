@@ -17,18 +17,25 @@ import SwiftUI
 struct HeightAnimationEngine {
     
     /// Animate height change with spring physics
-    /// Uses aether's proven parameters: 0.1 response, 0.8 damping
+    /// Uses design tokens for consistent animation parameters
     static func animateHeightChange(
         from currentHeight: CGFloat,
         to targetHeight: CGFloat,
         update: @escaping (CGFloat) -> Void
     ) {
+        let tokens = DesignTokens.shared
+        let animationThreshold = CGFloat(tokens.animations.textExpansion["animationThreshold"] ?? 2)
+        
         // Performance threshold: only animate significant changes
-        if abs(currentHeight - targetHeight) > 2 {
+        if abs(currentHeight - targetHeight) > animationThreshold {
+            let response = tokens.animations.textExpansion["response"] ?? 0.1
+            let dampingFraction = tokens.animations.textExpansion["dampingFraction"] ?? 0.8
+            let blendDuration = tokens.animations.textExpansion["blendDuration"] ?? 0
+            
             withAnimation(.spring(
-                response: 0.1,      // Fast response
-                dampingFraction: 0.8, // Well-damped
-                blendDuration: 0     // No blend transition
+                response: response,
+                dampingFraction: dampingFraction,
+                blendDuration: blendDuration
             )) {
                 update(targetHeight)
             }
@@ -40,6 +47,8 @@ struct HeightAnimationEngine {
     
     /// Check if height change warrants animation
     static func shouldAnimate(from currentHeight: CGFloat, to targetHeight: CGFloat) -> Bool {
-        return abs(currentHeight - targetHeight) > 2
+        let tokens = DesignTokens.shared
+        let animationThreshold = CGFloat(tokens.animations.textExpansion["animationThreshold"] ?? 2)
+        return abs(currentHeight - targetHeight) > animationThreshold
     }
 }

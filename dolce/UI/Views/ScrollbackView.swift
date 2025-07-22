@@ -123,7 +123,12 @@ struct ScrollbackView: View {
         let personaKey = message.isFromBoss ? "boss" : (message.persona?.lowercased() ?? "claude")
         
         guard let colorData = tokens.elements.scrollback.authorLabel.minimalBadge.accentColors[personaKey] else {
-            return Color.blue // fallback
+            let fallbackColor = tokens.elements.scrollback.fallbackColor
+            return Color(
+                red: fallbackColor.red,
+                green: fallbackColor.green,
+                blue: fallbackColor.blue
+            )
         }
         
         return Color(

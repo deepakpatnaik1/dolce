@@ -207,21 +207,17 @@ struct DesignTokens: Codable {
     
     static let shared: DesignTokens = {
         guard let url = Bundle.main.url(forResource: "DesignTokens", withExtension: "json") else {
-            print("❌ Could not find DesignTokens.json in bundle")
             fatalError("Could not find DesignTokens.json in bundle")
         }
         
         guard let data = try? Data(contentsOf: url) else {
-            print("❌ Could not read DesignTokens.json data")
             fatalError("Could not read DesignTokens.json data")
         }
         
         do {
             let tokens = try JSONDecoder().decode(DesignTokens.self, from: data)
-            print("✅ DesignTokens loaded successfully")
             return tokens
         } catch {
-            print("❌ Could not decode DesignTokens.json: \(error)")
             fatalError("Could not decode DesignTokens.json: \(error)")
         }
     }()
