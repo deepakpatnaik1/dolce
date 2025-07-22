@@ -51,12 +51,9 @@ struct APIConfigurationProvider {
             providerId = "anthropic"
         case .openai:
             providerId = "openai"
-        case .fireworks:
-            providerId = "fireworks"
-        case .ollama:
-            providerId = "ollama"
-        case .local:
-            providerId = "local"
+        @unknown default:
+            // Resilient: return nil for unknown providers
+            return nil
         }
         
         guard let providerConfig = ModelProvider.getProviderConfig(for: providerId) else {
@@ -67,10 +64,7 @@ struct APIConfigurationProvider {
         var headers = providerConfig.additionalHeaders ?? [:]
         var apiKey = ""
         
-        if providerId == "local" || providerId == "ollama" {
-            // Local and Ollama models don't need authentication
-            apiKey = "local"
-        } else if let apiKeyId = providerConfig.apiKeyIdentifier,
+        if let apiKeyId = providerConfig.apiKeyIdentifier,
                   let authHeader = providerConfig.authHeader {
             // API-based models need authentication
             guard let fetchedKey = APIKeyManager.getAPIKey(for: apiKeyId) else {

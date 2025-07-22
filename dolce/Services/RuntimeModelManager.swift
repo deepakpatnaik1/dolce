@@ -6,7 +6,6 @@ final class RuntimeModelManager: ObservableObject {
     static let shared = RuntimeModelManager()
     
     @Published var selectedModel: String
-    @ObservedObject private var localModelDetector = LocalModelDetector.shared
     
     private init() {
         // Load default model from configuration
@@ -37,24 +36,15 @@ final class RuntimeModelManager: ObservableObject {
         return nil
     }
     
-    /// Get all available models including local ones
+    /// Get all available models
     func getAvailableModels() -> [(provider: String, model: Model, isLocal: Bool)] {
         var availableModels: [(provider: String, model: Model, isLocal: Bool)] = []
         let modelsConfig = ModelsConfiguration.shared
         
         for (providerKey, provider) in modelsConfig.providers {
             for model in provider.models {
-                let isLocal = providerKey == "ollama"
-                
-                // Include local models only if they are actually available
-                if isLocal {
-                    if localModelDetector.isModelAvailable(model.key) {
-                        availableModels.append((providerKey, model, true))
-                    }
-                } else {
-                    // Always include remote models
-                    availableModels.append((providerKey, model, false))
-                }
+                // Include all models - check availability later
+                availableModels.append((providerKey, model, false))
             }
         }
         
@@ -63,12 +53,7 @@ final class RuntimeModelManager: ObservableObject {
     
     /// Check if currently selected model is available
     func isCurrentModelAvailable() -> Bool {
-        guard let (providerKey, _) = getCurrentModelConfiguration() else { return false }
-        
-        // Local models need to be actually available
-        if providerKey == "ollama" {
-            return localModelDetector.isModelAvailable(selectedModel)
-        }
+        guard let _ = getCurrentModelConfiguration() else { return false }
         
         // Remote models are assumed available
         return true

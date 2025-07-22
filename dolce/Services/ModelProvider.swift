@@ -18,9 +18,6 @@ import Foundation
 enum APIProvider {
     case anthropic
     case openai
-    case fireworks
-    case ollama
-    case local
 }
 
 // MARK: - Data Models
@@ -45,12 +42,7 @@ struct ModelProvider {
         for (providerId, providerConfig) in config.providers {
             // Check access based on provider type
             let hasAccess: Bool
-            if providerId == "ollama" {
-                // Always allow Ollama models in config, check availability later
-                hasAccess = true
-            } else if providerId == "local" {
-                hasAccess = true // Other local models are always available
-            } else if let apiKeyId = providerConfig.apiKeyIdentifier {
+            if let apiKeyId = providerConfig.apiKeyIdentifier {
                 hasAccess = APIKeyManager.getAPIKey(for: apiKeyId) != nil
             } else {
                 hasAccess = false
@@ -60,7 +52,6 @@ struct ModelProvider {
                 let provider = mapStringToProvider(providerId)
                 
                 for modelConfig in providerConfig.models {
-                    // Add all configured models (Ollama availability checked when needed)
                     let model = LLMModel(
                         key: "\(providerId):\(modelConfig.key)",
                         displayName: modelConfig.displayName,
@@ -105,12 +96,6 @@ struct ModelProvider {
             return .anthropic
         case "openai":
             return .openai
-        case "fireworks":
-            return .fireworks
-        case "ollama":
-            return .ollama
-        case "local":
-            return .local
         default:
             return .anthropic // Default fallback
         }

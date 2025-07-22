@@ -99,11 +99,9 @@ struct ResponseParser {
             // Extract content from choices (handle null content gracefully)
             if let choices = json["choices"] as? [[String: Any]],
                let firstChoice = choices.first,
-               let delta = firstChoice["delta"] as? [String: Any] {
-                let content = delta["content"] as? String
-                if content != nil {
-                    return StreamingChunk(content: content, isComplete: false, error: nil)
-                }
+               let delta = firstChoice["delta"] as? [String: Any],
+               let content = delta["content"] as? String {
+                return StreamingChunk(content: content, isComplete: false, error: nil)
             }
             
             // Check for completion
@@ -119,35 +117,26 @@ struct ResponseParser {
     
     /// Parse complete OpenAI response
     static func parseOpenAIResponse(_ data: Data) -> ParsedResponse? {
-        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let choices = json["choices"] as? [[String: Any]],
-              let firstChoice = choices.first,
-              let message = firstChoice["message"] as? [String: Any],
-              let content = message["content"] as? String else {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return nil
         }
         
-        return ParsedResponse(content: content, isComplete: true, metadata: json)
-    }
-    
-    // MARK: - Local Model Parsing
-    
-    private static func parseLocalStreamingLine(_ line: String) -> StreamingChunk {
-        // For now, return a placeholder - local models need different handling
-        return StreamingChunk(
-            content: "Local model support not implemented yet",
-            isComplete: true,
-            error: nil
-        )
-    }
-    
-    private static func parseLocalResponse(_ data: Data) -> ParsedResponse? {
-        // For now, return a placeholder - local models need different handling
-        return ParsedResponse(
-            content: "Local model support not implemented yet",
-            isComplete: true,
-            metadata: nil
-        )
+        // Handle both streaming and non-streaming response formats
+        if let choices = json["choices"] as? [[String: Any]],
+           let firstChoice = choices.first {
+            // Standard format with message
+            if let message = firstChoice["message"] as? [String: Any],
+               let content = message["content"] as? String {
+                return ParsedResponse(content: content, isComplete: true, metadata: json)
+            }
+            // Streaming format with delta
+            if let delta = firstChoice["delta"] as? [String: Any],
+               let content = delta["content"] as? String {
+                return ParsedResponse(content: content, isComplete: true, metadata: json)
+            }
+        }
+        
+        return nil
     }
     
     // MARK: - Generic Parsing
@@ -159,12 +148,9 @@ struct ResponseParser {
             return parseAnthropicStreamingLine(line)
         case .openai:
             return parseOpenAIStreamingLine(line)
-        case .fireworks:
-            return parseOpenAIStreamingLine(line) // Fireworks uses OpenAI format
-        case .ollama:
-            return parseOpenAIStreamingLine(line) // Ollama uses OpenAI-compatible format
-        case .local:
-            return parseLocalStreamingLine(line) // Local models need special handling
+        @unknown default:
+            // Resilient: return empty chunk for unknown providers
+            return StreamingChunk(content: "", isComplete: false, error: nil)
         }
     }
     
@@ -175,12 +161,9 @@ struct ResponseParser {
             return parseAnthropicResponse(data)
         case .openai:
             return parseOpenAIResponse(data)
-        case .fireworks:
-            return parseOpenAIResponse(data) // Fireworks uses OpenAI format
-        case .ollama:
-            return parseOpenAIResponse(data) // Ollama uses OpenAI-compatible format
-        case .local:
-            return parseLocalResponse(data) // Local models need special handling
+        @unknown default:
+            // Resilient: return nil for unknown providers
+            return nil
         }
     }
 }
