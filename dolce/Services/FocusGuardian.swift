@@ -32,7 +32,9 @@ final class FocusGuardian: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.shouldFocusInput = true
+            Task { @MainActor in
+                self?.shouldFocusInput = true
+            }
         }
     }
     

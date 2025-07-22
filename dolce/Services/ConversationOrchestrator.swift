@@ -119,7 +119,7 @@ class ConversationOrchestrator: ObservableObject {
                     break
                 }
                 
-                if let error = chunk.error {
+                if chunk.error != nil {
                     // Handle parsing error silently
                 }
             }

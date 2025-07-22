@@ -24,13 +24,13 @@ struct HeightAnimationEngine {
         update: @escaping (CGFloat) -> Void
     ) {
         let tokens = DesignTokens.shared
-        let animationThreshold = CGFloat(tokens.animations.textExpansion["animationThreshold"] ?? 2)
+        let animationThreshold = CGFloat(tokens.animations.textExpansion.animationThreshold)
         
         // Performance threshold: only animate significant changes
         if abs(currentHeight - targetHeight) > animationThreshold {
-            let response = tokens.animations.textExpansion["response"] ?? 0.1
-            let dampingFraction = tokens.animations.textExpansion["dampingFraction"] ?? 0.8
-            let blendDuration = tokens.animations.textExpansion["blendDuration"] ?? 0
+            let response = tokens.animations.textExpansion.response
+            let dampingFraction = tokens.animations.textExpansion.dampingFraction
+            let blendDuration = tokens.animations.textExpansion.blendDuration
             
             withAnimation(.spring(
                 response: response,
@@ -48,7 +48,7 @@ struct HeightAnimationEngine {
     /// Check if height change warrants animation
     static func shouldAnimate(from currentHeight: CGFloat, to targetHeight: CGFloat) -> Bool {
         let tokens = DesignTokens.shared
-        let animationThreshold = CGFloat(tokens.animations.textExpansion["animationThreshold"] ?? 2)
+        let animationThreshold = CGFloat(tokens.animations.textExpansion.animationThreshold)
         return abs(currentHeight - targetHeight) > animationThreshold
     }
 }

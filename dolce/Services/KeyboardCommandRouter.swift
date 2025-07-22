@@ -17,6 +17,9 @@ import SwiftUI
 enum KeyboardAction {
     case sendMessage
     case addNewLine
+    case turnNavigateUp
+    case turnNavigateDown
+    case turnModeExit
     case ignore
 }
 
@@ -29,6 +32,12 @@ struct KeyboardCommandRouter {
             return .sendMessage
         case (.return, [.option]):    // Option+Enter → add new line
             return .addNewLine
+        case (.upArrow, [.option]):   // Option+Up → navigate to previous turn
+            return .turnNavigateUp
+        case (.downArrow, [.option]): // Option+Down → navigate to next turn
+            return .turnNavigateDown
+        case (.escape, []):           // Escape → exit turn mode
+            return .turnModeExit
         default:
             return .ignore
         }
@@ -36,6 +45,9 @@ struct KeyboardCommandRouter {
     
     /// Check if key press should be handled by router
     static func shouldHandle(_ keyPress: KeyPress) -> Bool {
-        return keyPress.key == .return
+        return keyPress.key == .return || 
+               keyPress.key == .escape || 
+               (keyPress.key == .upArrow && keyPress.modifiers.contains(.option)) ||
+               (keyPress.key == .downArrow && keyPress.modifiers.contains(.option))
     }
 }

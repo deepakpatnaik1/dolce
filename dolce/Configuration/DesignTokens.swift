@@ -30,6 +30,8 @@ struct DesignTokens: Codable {
         let padding: [String: Double]
         let margins: [String: Double]
         let sizing: [String: Double]
+        let chrome: [String: Double]
+        let fallbacks: [String: Double]
     }
     
     struct Glassmorphic: Codable {
@@ -95,8 +97,15 @@ struct DesignTokens: Codable {
         struct Scrollback: Codable {
             let bodyFontSize: Double
             let authorFontSize: Double
+            let fallbackColor: ColorData
             let highlight: Highlight
             let authorLabel: AuthorLabel
+            
+            struct ColorData: Codable {
+                let red: Double
+                let green: Double
+                let blue: Double
+            }
             
             struct Highlight: Codable {
                 let fillOpacity: Double
@@ -165,6 +174,7 @@ struct DesignTokens: Codable {
         let paneTransition: PaneTransition
         let window: Window
         let messageNavigation: MessageNavigation
+        let textExpansion: TextExpansion
         
         struct PaneTransition: Codable {
             let response: Double
@@ -180,6 +190,13 @@ struct DesignTokens: Codable {
             let scrollDuration: Double
             let smoothScrollIncrement: Double
             let smoothScrollDuration: Double
+        }
+        
+        struct TextExpansion: Codable {
+            let response: Double
+            let dampingFraction: Double
+            let blendDuration: Double
+            let animationThreshold: Double
         }
     }
     

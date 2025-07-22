@@ -18,12 +18,15 @@ struct InputBarView: View {
     @State private var textHeight: CGFloat
     @FocusState private var isInputFocused: Bool
     @ObservedObject var conversationOrchestrator: ConversationOrchestrator
+    @ObservedObject var messageStore: MessageStore
     @StateObject private var focusGuardian = FocusGuardian.shared
+    @ObservedObject private var turnModeCoordinator = TurnModeCoordinator.shared
     
     private let tokens = DesignTokens.shared
     
-    init(conversationOrchestrator: ConversationOrchestrator) {
+    init(conversationOrchestrator: ConversationOrchestrator, messageStore: MessageStore) {
         self.conversationOrchestrator = conversationOrchestrator
+        self.messageStore = messageStore
         
         // Calculate single-line height for initial state using TextMeasurementEngine
         let font = NSFont(name: DesignTokens.shared.typography.bodyFont, size: 12) ?? NSFont.systemFont(ofSize: 12)
@@ -47,7 +50,7 @@ struct InputBarView: View {
                     .onSubmit {
                         // Disabled - handled by onKeyPress
                     }
-                    .onKeyPress(keys: [.return]) { keyPress in
+                    .onKeyPress(keys: [.return, .escape, .upArrow, .downArrow]) { keyPress in
                         switch KeyboardCommandRouter.routeKeyPress(keyPress) {
                         case .sendMessage:
                             sendMessage()
@@ -55,6 +58,15 @@ struct InputBarView: View {
                         case .addNewLine:
                             // Let TextField handle naturally for new line
                             return .ignored
+                        case .turnNavigateUp:
+                            turnModeCoordinator.handleKeyboardCommand(.navigateUp, messages: messageStore.messages)
+                            return .handled
+                        case .turnNavigateDown:
+                            turnModeCoordinator.handleKeyboardCommand(.navigateDown, messages: messageStore.messages)
+                            return .handled
+                        case .turnModeExit:
+                            turnModeCoordinator.handleKeyboardCommand(.exitTurnMode, messages: messageStore.messages)
+                            return .handled
                         case .ignore:
                             return .ignored
                         }
@@ -163,6 +175,11 @@ struct InputBarView: View {
         
         Task {
             await conversationOrchestrator.sendMessage(messageToSend)
+            
+            // Handle turn mode: if in turn mode, move to latest turn to show new conversation
+            if TurnManager.shared.isInTurnMode {
+                turnModeCoordinator.handleNewMessageInTurnMode(messages: messageStore.messages)
+            }
         }
     }
     

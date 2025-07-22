@@ -16,12 +16,18 @@ import SwiftUI
 struct ScrollbackView: View {
     let messages: [ChatMessage]
     private let tokens = DesignTokens.shared
+    @ObservedObject private var turnManager = TurnManager.shared
+    
+    // Computed property for display messages (turn-filtered)
+    private var displayMessages: [ChatMessage] {
+        return TurnFilter.getDisplayMessages(from: messages, turnManager: turnManager)
+    }
     
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
-                    let showAuthor = shouldShowAuthor(at: index)
+                ForEach(Array(displayMessages.enumerated()), id: \.element.id) { index, message in
+                    let showAuthor = shouldShowAuthor(at: index, in: displayMessages)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         // Author label with persona colors
@@ -31,7 +37,7 @@ struct ScrollbackView: View {
                         
                         // Message content
                         messageContent(message)
-                            .padding(.bottom, isLastFromSpeaker(at: index) ? 16 : 4)
+                            .padding(.bottom, isLastFromSpeaker(at: index, in: displayMessages) ? 16 : 4)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -101,21 +107,21 @@ struct ScrollbackView: View {
     
     // MARK: - Helper Functions
     
-    private func shouldShowAuthor(at index: Int) -> Bool {
-        guard index < messages.count else { return false }
+    private func shouldShowAuthor(at index: Int, in messageArray: [ChatMessage]) -> Bool {
+        guard index < messageArray.count else { return false }
         if index == 0 { return true }
         
-        let currentMessage = messages[index]
-        let previousMessage = messages[index - 1]
+        let currentMessage = messageArray[index]
+        let previousMessage = messageArray[index - 1]
         return currentMessage.displayAuthor != previousMessage.displayAuthor
     }
     
-    private func isLastFromSpeaker(at index: Int) -> Bool {
-        guard index < messages.count else { return true }
-        if index == messages.count - 1 { return true }
+    private func isLastFromSpeaker(at index: Int, in messageArray: [ChatMessage]) -> Bool {
+        guard index < messageArray.count else { return true }
+        if index == messageArray.count - 1 { return true }
         
-        let currentMessage = messages[index]
-        let nextMessage = messages[index + 1]
+        let currentMessage = messageArray[index]
+        let nextMessage = messageArray[index + 1]
         return currentMessage.displayAuthor != nextMessage.displayAuthor
     }
     

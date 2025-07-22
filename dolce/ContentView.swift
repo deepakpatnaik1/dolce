@@ -33,12 +33,11 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 // Beautiful InputBarView with glassmorphic styling
-                InputBarView(conversationOrchestrator: conversationOrchestrator)
+                InputBarView(conversationOrchestrator: conversationOrchestrator, messageStore: messageStore)
             }
         }
         .onAppear {
-            messageStore.loadSampleMessages()
-            
+            // App initialization
         }
     }
 }
