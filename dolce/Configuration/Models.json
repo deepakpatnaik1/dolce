@@ -1,0 +1,107 @@
+{
+  "providers": {
+    "anthropic": {
+      "name": "Anthropic",
+      "apiKeyIdentifier": "ANTHROPIC_API_KEY",
+      "baseURL": "https://api.anthropic.com/v1",
+      "endpoint": "/messages",
+      "authHeader": "x-api-key",
+      "models": [
+        {
+          "key": "claude-sonnet-4-20250514",
+          "displayName": "claude-sonnet-4-20250514",
+          "maxTokens": 4000
+        },
+        {
+          "key": "claude-opus-4-20250514",
+          "displayName": "claude-opus-4-20250514",
+          "maxTokens": 4000
+        },
+        {
+          "key": "claude-3-5-sonnet-20241022",
+          "displayName": "claude-3-5-sonnet-20241022",
+          "maxTokens": 1000
+        },
+        {
+          "key": "claude-3-5-haiku-20241022",
+          "displayName": "claude-3-5-haiku-20241022",
+          "maxTokens": 1000
+        },
+        {
+          "key": "claude-3-opus-20240229",
+          "displayName": "claude-3-opus-20240229",
+          "maxTokens": 1000
+        }
+      ],
+      "additionalHeaders": {
+        "anthropic-version": "2023-06-01"
+      }
+    },
+    "openai": {
+      "name": "OpenAI",
+      "apiKeyIdentifier": "OPENAI_API_KEY",
+      "baseURL": "https://api.openai.com/v1",
+      "endpoint": "/chat/completions",
+      "authHeader": "Authorization",
+      "authPrefix": "Bearer",
+      "models": [
+        {
+          "key": "gpt-4o",
+          "displayName": "gpt-4o",
+          "maxTokens": 1000
+        },
+        {
+          "key": "gpt-4o-mini",
+          "displayName": "gpt-4o-mini",
+          "maxTokens": 1000
+        },
+        {
+          "key": "gpt-4-turbo",
+          "displayName": "gpt-4-turbo",
+          "maxTokens": 1000
+        },
+        {
+          "key": "gpt-3.5-turbo",
+          "displayName": "gpt-3.5-turbo",
+          "maxTokens": 1000
+        }
+      ]
+    },
+    "fireworks": {
+      "name": "Fireworks",
+      "apiKeyIdentifier": "FIREWORKS_API_KEY",
+      "baseURL": "https://api.fireworks.ai/inference/v1",
+      "endpoint": "/chat/completions",
+      "authHeader": "Authorization",
+      "authPrefix": "Bearer",
+      "models": [
+        {
+          "key": "accounts/fireworks/models/llama-4-maverick",
+          "displayName": "llama-4-maverick",
+          "maxTokens": 1000
+        }
+      ]
+    },
+    "local": {
+      "name": "Local",
+      "apiKeyIdentifier": null,
+      "baseURL": "local://",
+      "endpoint": "",
+      "authHeader": null,
+      "models": [
+        {
+          "key": "llama-3-1-405b-instruct",
+          "displayName": "llama-3-1-405b-instruct",
+          "maxTokens": 1000,
+          "isLocal": true
+        },
+        {
+          "key": "llama-3-1-70b-instruct", 
+          "displayName": "llama-3-1-70b-instruct",
+          "maxTokens": 1000,
+          "isLocal": true
+        }
+      ]
+    }
+  }
+}

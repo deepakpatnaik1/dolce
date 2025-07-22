@@ -128,6 +128,26 @@ struct ResponseParser {
         return ParsedResponse(content: content, isComplete: true, metadata: json)
     }
     
+    // MARK: - Local Model Parsing
+    
+    private static func parseLocalStreamingLine(_ line: String) -> StreamingChunk {
+        // For now, return a placeholder - local models need different handling
+        return StreamingChunk(
+            content: "Local model support not implemented yet",
+            isComplete: true,
+            error: nil
+        )
+    }
+    
+    private static func parseLocalResponse(_ data: Data) -> ParsedResponse? {
+        // For now, return a placeholder - local models need different handling
+        return ParsedResponse(
+            content: "Local model support not implemented yet",
+            isComplete: true,
+            metadata: nil
+        )
+    }
+    
     // MARK: - Generic Parsing
     
     /// Parse streaming line based on provider
@@ -137,6 +157,10 @@ struct ResponseParser {
             return parseAnthropicStreamingLine(line)
         case .openai:
             return parseOpenAIStreamingLine(line)
+        case .fireworks:
+            return parseOpenAIStreamingLine(line) // Fireworks uses OpenAI format
+        case .local:
+            return parseLocalStreamingLine(line) // Local models need special handling
         }
     }
     
@@ -147,6 +171,10 @@ struct ResponseParser {
             return parseAnthropicResponse(data)
         case .openai:
             return parseOpenAIResponse(data)
+        case .fireworks:
+            return parseOpenAIResponse(data) // Fireworks uses OpenAI format
+        case .local:
+            return parseLocalResponse(data) // Local models need special handling
         }
     }
 }
@@ -156,4 +184,6 @@ struct ResponseParser {
 enum APIProvider {
     case anthropic
     case openai
+    case fireworks
+    case local
 }

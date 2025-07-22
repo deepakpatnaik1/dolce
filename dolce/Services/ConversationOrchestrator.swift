@@ -17,9 +17,11 @@ import SwiftUI
 @MainActor
 class ConversationOrchestrator: ObservableObject {
     private let messageStore: MessageStore
+    @Published var selectedModelKey: String?
     
     init(messageStore: MessageStore) {
         self.messageStore = messageStore
+        self.selectedModelKey = ModelProvider.getDefaultModel()?.key
     }
     
     // MARK: - Public Interface
@@ -44,13 +46,31 @@ class ConversationOrchestrator: ObservableObject {
         return APIConfigurationProvider.getConfigurationStatus()
     }
     
+    /// Change selected model
+    func selectModel(_ modelKey: String) {
+        selectedModelKey = modelKey
+    }
+    
+    /// Get currently selected model
+    func getSelectedModel() -> LLMModel? {
+        guard let selectedModelKey = selectedModelKey else { return nil }
+        return ModelProvider.getModel(for: selectedModelKey)
+    }
+    
     // MARK: - Private Orchestration
     
     /// Orchestrate AI response generation
     private func getAIResponse(for userMessage: String, persona: String) async {
         do {
-            // Get configuration
-            guard let config = APIConfigurationProvider.getDefaultConfig() else {
+            // Get configuration for selected model
+            let config: APIConfiguration?
+            if let selectedModelKey = selectedModelKey {
+                config = APIConfigurationProvider.getConfigForModel(selectedModelKey)
+            } else {
+                config = APIConfigurationProvider.getDefaultConfig()
+            }
+            
+            guard let config = config else {
                 addErrorMessage("No API configuration available")
                 return
             }

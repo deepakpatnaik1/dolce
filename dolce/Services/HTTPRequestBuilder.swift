@@ -18,7 +18,7 @@ struct HTTPRequestBuilder {
     /// Build HTTP request for API calls
     static func buildRequest(
         baseURL: String,
-        endpoint: String = "/messages",
+        endpoint: String? = nil,
         apiKey: String,
         requestBody: [String: Any],
         headers: [String: String] = [:]
@@ -27,8 +27,9 @@ struct HTTPRequestBuilder {
         // Validate inputs
         try validateInputs(baseURL: baseURL, apiKey: apiKey, requestBody: requestBody)
         
-        // Build URL
-        let url = try buildURL(baseURL: baseURL, endpoint: endpoint)
+        // Build URL - determine endpoint based on provider if not specified
+        let finalEndpoint = endpoint ?? determineEndpoint(from: requestBody)
+        let url = try buildURL(baseURL: baseURL, endpoint: finalEndpoint)
         
         // Create request
         var request = URLRequest(url: url)
@@ -73,6 +74,15 @@ struct HTTPRequestBuilder {
         guard !requestBody.isEmpty else {
             throw HTTPRequestBuilderError.invalidInput("Request body cannot be empty")
         }
+    }
+    
+    private static func determineEndpoint(from requestBody: [String: Any]) -> String {
+        // Check if this looks like an Anthropic request (has "messages" field)
+        if requestBody["messages"] != nil {
+            return "/messages"
+        }
+        // Default to OpenAI/Fireworks format
+        return "/chat/completions"
     }
 }
 

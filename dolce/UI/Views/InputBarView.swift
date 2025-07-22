@@ -71,6 +71,9 @@ struct InputBarView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
                 
+                // Model picker
+                ModelPickerView(conversationOrchestrator: conversationOrchestrator)
+                
                 Spacer()
                 
                 // Send button (only show when text present)
