@@ -36,56 +36,6 @@ struct ConversationSettings {
 
 struct APIConfigurationProvider {
     
-    /// Get Anthropic API configuration
-    static func getAnthropicConfig() -> APIConfiguration? {
-        guard let apiKey = APIKeyManager.getAPIKey(for: "ANTHROPIC_API_KEY") else {
-            return nil
-        }
-        
-        return APIConfiguration(
-            provider: .anthropic,
-            baseURL: "https://api.anthropic.com/v1",
-            endpoint: "/messages",
-            apiKey: apiKey,
-            model: "claude-3-5-sonnet-20241022",
-            maxTokens: 1000,
-            headers: ["anthropic-version": "2023-06-01", "x-api-key": apiKey]
-        )
-    }
-    
-    /// Get OpenAI API configuration
-    static func getOpenAIConfig() -> APIConfiguration? {
-        guard let apiKey = APIKeyManager.getAPIKey(for: "OPENAI_API_KEY") else {
-            return nil
-        }
-        
-        return APIConfiguration(
-            provider: .openai,
-            baseURL: "https://api.openai.com/v1",
-            endpoint: "/chat/completions",
-            apiKey: apiKey,
-            model: "gpt-4.1-mini-2025-04-14",
-            maxTokens: 1000,
-            headers: ["Authorization": "Bearer \(apiKey)"]
-        )
-    }
-    
-    /// Get Fireworks API configuration
-    static func getFireworksConfig() -> APIConfiguration? {
-        guard let apiKey = APIKeyManager.getAPIKey(for: "FIREWORKS_API_KEY") else {
-            return nil
-        }
-        
-        return APIConfiguration(
-            provider: .fireworks,
-            baseURL: "https://api.fireworks.ai/inference/v1",
-            endpoint: "/chat/completions",
-            apiKey: apiKey,
-            model: "llama-3-1-405b",
-            maxTokens: 1000,
-            headers: ["Authorization": "Bearer \(apiKey)"]
-        )
-    }
     
     /// Get API configuration for specific model
     static func getConfigForModel(_ modelKey: String) -> APIConfiguration? {
@@ -148,8 +98,11 @@ struct APIConfigurationProvider {
     
     /// Get default API configuration
     static func getDefaultConfig() -> APIConfiguration? {
-        // Try Anthropic first, fallback to OpenAI, then Fireworks
-        return getAnthropicConfig() ?? getOpenAIConfig() ?? getFireworksConfig()
+        // Use the default model from configuration
+        guard let defaultModel = ModelsConfiguration.shared.defaultModel else {
+            return nil
+        }
+        return getConfigForModel(defaultModel)
     }
     
     /// Get default conversation settings
@@ -169,12 +122,8 @@ struct APIConfigurationProvider {
     
     /// Get human-readable configuration status
     static func getConfigurationStatus() -> String {
-        if getAnthropicConfig() != nil {
-            return "Anthropic API configured"
-        } else if getOpenAIConfig() != nil {
-            return "OpenAI API configured"
-        } else if getFireworksConfig() != nil {
-            return "Fireworks API configured"
+        if getDefaultConfig() != nil {
+            return "API configured"
         } else {
             return "No API keys configured"
         }
