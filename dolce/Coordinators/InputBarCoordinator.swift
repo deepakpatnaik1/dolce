@@ -138,9 +138,12 @@ class InputBarCoordinator: ObservableObject {
     
     /// Handle text changes to detect persona and switch models
     func handleTextChange(_ text: String) {
-        // Detect persona from input
-        if let detected = PersonaDetector.detectPersona(from: text) {
-            switchToDefaultModel(for: detected.persona)
+        // Try instant persona detection for model switching
+        if let persona = PersonaDetector.detectPersonaForSwitching(from: text) {
+            // Update session immediately
+            PersonaSessionManager.shared.setCurrentPersona(persona)
+            // Switch to appropriate model
+            switchToDefaultModel(for: persona)
         }
     }
     

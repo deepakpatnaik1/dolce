@@ -77,4 +77,31 @@ struct PersonaDetector {
         let availablePersonas = VaultPersonaLoader.discoverPersonas()
         return availablePersonas.contains(name.lowercased())
     }
+    
+    /// Detect persona for instant model switching (no punctuation required)
+    /// Returns persona name if the entire text matches a persona name
+    static func detectPersonaForSwitching(from text: String) -> String? {
+        let trimmed = text.trimmingCharacters(in: .whitespaces).lowercased()
+        
+        // Empty check
+        guard !trimmed.isEmpty else {
+            return nil
+        }
+        
+        // Get available personas
+        let availablePersonas = VaultPersonaLoader.discoverPersonas()
+        
+        // Check if the entire text is a persona name
+        if availablePersonas.contains(trimmed) {
+            return trimmed
+        }
+        
+        // Also check if text is a persona name with trailing punctuation
+        let withoutPunctuation = trimmed.trimmingCharacters(in: CharacterSet(charactersIn: ",:"))
+        if withoutPunctuation != trimmed && availablePersonas.contains(withoutPunctuation) {
+            return withoutPunctuation
+        }
+        
+        return nil
+    }
 }
