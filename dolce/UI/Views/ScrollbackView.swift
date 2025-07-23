@@ -53,11 +53,14 @@ struct ScrollbackView: View {
     
     @ViewBuilder
     private func messageContent(_ message: ChatMessage) -> some View {
+        // For now, just render as plain text with proper line breaks
+        // TODO: Implement proper markdown rendering
         Text(message.content)
             .font(.custom(tokens.typography.bodyFont, size: tokens.elements.scrollback.bodyFontSize))
             .foregroundColor(.white)
             .multilineTextAlignment(.leading)
             .padding(.leading, 8)
+            .textSelection(.enabled)
     }
     
     // MARK: - Author Label

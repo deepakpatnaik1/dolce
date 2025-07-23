@@ -81,8 +81,8 @@ class ConversationOrchestrator: ObservableObject {
             // Build request
             let request = try buildRequest(message: userMessage, config: config)
             
-            // Handle OpenAI non-streaming response
-            if config.provider == .openai {
+            // Handle non-streaming response for OpenAI and Anthropic
+            if config.provider == .openai || config.provider == .anthropic {
                 // Execute non-streaming request
                 let (data, _) = try await HTTPExecutor.executeRequest(request)
                 
@@ -122,7 +122,7 @@ class ConversationOrchestrator: ObservableObject {
                 message: message,
                 model: config.model,
                 maxTokens: config.maxTokens,
-                streaming: true
+                streaming: false  // Temporarily disabled for better markdown rendering
             )
         @unknown default:
             requestBody = RequestBodyBuilder.buildSingleMessageBody(
