@@ -12,6 +12,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 @MainActor
 class InputBarCoordinator: ObservableObject {
@@ -45,8 +46,10 @@ class InputBarCoordinator: ObservableObject {
         
         if let detected = PersonaDetector.detectPersona(from: trimmedText) {
             // Persona detected - switch to it
-            finalText = detected.cleanedMessage
             targetPersona = detected.persona
+            
+            // Always preserve the full message including persona name
+            finalText = trimmedText
             
             // Update session
             PersonaSessionManager.shared.setCurrentPersona(targetPersona)
@@ -131,6 +134,25 @@ class InputBarCoordinator: ObservableObject {
         case .failure(let error):
             // Log validation error but continue
             print("File validation failed: \(error)")
+        }
+    }
+    
+    // MARK: - Keyboard Command Handling
+    
+    /// Handle keyboard commands from input bar
+    func handleKeyboardCommand(_ action: KeyboardAction) -> KeyPress.Result {
+        switch action {
+        case .turnNavigateUp:
+            turnModeCoordinator.handleKeyboardCommand(.navigateUp, messages: messageStore.messages)
+            return .handled
+        case .turnNavigateDown:
+            turnModeCoordinator.handleKeyboardCommand(.navigateDown, messages: messageStore.messages)
+            return .handled
+        case .turnModeExit:
+            turnModeCoordinator.handleKeyboardCommand(.exitTurnMode, messages: messageStore.messages)
+            return .handled
+        default:
+            return .ignored
         }
     }
     

@@ -76,8 +76,8 @@ struct InputBarView: View {
                         // Let TextField handle naturally for new line
                         return .ignored
                     case .turnNavigateUp, .turnNavigateDown, .turnModeExit:
-                        // Turn navigation handled elsewhere
-                        return .ignored
+                        // Delegate turn navigation to coordinator
+                        return coordinator.handleKeyboardCommand(KeyboardCommandRouter.routeKeyPress(keyPress))
                     case .ignore:
                         return .ignored
                     }
