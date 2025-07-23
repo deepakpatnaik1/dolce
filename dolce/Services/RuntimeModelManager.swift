@@ -11,6 +11,10 @@ final class RuntimeModelManager: ObservableObject {
         // Load default model from configuration
         if let defaultModel = ModelsConfiguration.shared.defaultModel {
             self.selectedModel = defaultModel
+        } else if let nonClaudeDefault = PersonaMappingLoader.getDefaultModel(for: .nonClaude) {
+            // Use the default non-Claude model from persona mapping
+            // Need to add provider prefix for OpenAI models
+            self.selectedModel = "openai:\(nonClaudeDefault)"
         } else {
             // Fallback if no default specified
             self.selectedModel = ""
