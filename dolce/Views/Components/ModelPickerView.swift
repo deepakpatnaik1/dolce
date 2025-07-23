@@ -19,7 +19,9 @@ struct ModelPickerView: View {
     
     private var availableModels: [LLMModel] {
         // Refresh available models to include newly detected local models
-        return ModelProvider.getAvailableModels()
+        let models = ModelProvider.getAvailableModels()
+        print("Available models in picker: \(models.map { $0.key })")
+        return models
     }
     
     private var selectedModel: LLMModel? {

@@ -2,62 +2,79 @@
 //  PersonaDetector.swift
 //  Dolce
 //
-//  Detect persona from input text
+//  Detect persona names at the start of messages
 //
-//  ATOMIC RESPONSIBILITY: Parse persona from user input only
-//  - Detect persona name in first word
-//  - Strip persona from input text
-//  - Case-insensitive matching
-//  - Zero business logic - pure text parsing
+//  ATOMIC RESPONSIBILITY: Parse persona from message text only
+//  - Check if message starts with a persona name
+//  - Extract persona and return cleaned message
+//  - Validate against available personas
+//  - Zero state management, zero side effects
 //
 
 import Foundation
 
 struct PersonaDetector {
     
-    /// Detect persona from the beginning of input text
-    /// Returns lowercased persona name if found
-    static func detectPersona(from input: String) -> String? {
-        let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
+    /// Detect persona from message and return cleaned text
+    /// Returns: (personaName, cleanedMessage) or nil if no persona detected
+    static func detectPersona(from message: String) -> (persona: String, cleanedMessage: String)? {
+        // Trim whitespace
+        let trimmedMessage = message.trimmingCharacters(in: .whitespaces)
         
-        // Get first word
-        let words = trimmed.components(separatedBy: .whitespaces)
-        guard let firstWord = words.first, !firstWord.isEmpty else {
+        // Empty message check
+        guard !trimmedMessage.isEmpty else {
             return nil
         }
         
-        // Clean first word (remove punctuation like "Claude," -> "claude")
-        let cleanedWord = firstWord
-            .trimmingCharacters(in: .punctuationCharacters)
-            .lowercased()
+        // Split by first space to get potential persona
+        let components = trimmedMessage.split(separator: " ", maxSplits: 1, omittingEmptySubsequences: true)
         
-        // Check if it's a known persona
-        let knownPersonas = VaultPersonaLoader.discoverPersonas()
-        if knownPersonas.contains(cleanedWord) {
-            return cleanedWord
+        guard components.count >= 1 else {
+            return nil
+        }
+        
+        let firstWord = String(components[0]).lowercased()
+        
+        // Remove trailing punctuation from first word if present
+        let cleanedFirstWord = firstWord.trimmingCharacters(in: CharacterSet(charactersIn: ",:"))
+        
+        // Get the remainder of the message
+        let remainder: String
+        if components.count > 1 {
+            remainder = String(components[1])
+        } else if firstWord != cleanedFirstWord {
+            // Had punctuation but no text after (e.g., "Claude,")
+            remainder = ""
+        } else {
+            // Just one word with no separator or following text
+            return nil
+        }
+        
+        // No persona pattern found if remainder is empty and no punctuation
+        guard !remainder.isEmpty || firstWord != cleanedFirstWord else {
+            return nil
+        }
+        
+        // Validate against available personas
+        let availablePersonas = VaultPersonaLoader.discoverPersonas()
+        
+        // Check if detected word is a valid persona
+        if availablePersonas.contains(cleanedFirstWord) {
+            return (cleanedFirstWord, remainder)
+        }
+        
+        // Special case for "Boss" - the user
+        if cleanedFirstWord == "boss" {
+            // Boss addressing themselves? Ignore
+            return nil
         }
         
         return nil
     }
     
-    /// Strip persona name from input and return clean message
-    static func stripPersonaFromInput(_ input: String) -> String {
-        let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        // Check if first word is a persona
-        guard detectPersona(from: input) != nil else {
-            return trimmed
-        }
-        
-        // Remove first word
-        let words = trimmed.components(separatedBy: .whitespaces)
-        let remainingWords = Array(words.dropFirst())
-        return remainingWords.joined(separator: " ")
-    }
-    
-    /// Check if input starts with a specific persona
-    static func inputStartsWithPersona(_ input: String, persona: String) -> Bool {
-        let detectedPersona = detectPersona(from: input)
-        return detectedPersona?.lowercased() == persona.lowercased()
+    /// Check if a word is a valid persona name
+    static func isValidPersona(_ name: String) -> Bool {
+        let availablePersonas = VaultPersonaLoader.discoverPersonas()
+        return availablePersonas.contains(name.lowercased())
     }
 }

@@ -39,9 +39,28 @@ class InputBarCoordinator: ObservableObject {
         
         guard hasText || hasFiles else { return }
         
-        // Compose message
+        // Detect persona from message
+        var finalText = trimmedText
+        var targetPersona: String
+        
+        if let detected = PersonaDetector.detectPersona(from: trimmedText) {
+            // Persona detected - switch to it
+            finalText = detected.cleanedMessage
+            targetPersona = detected.persona
+            
+            // Update session
+            PersonaSessionManager.shared.setCurrentPersona(targetPersona)
+            
+            // Switch to appropriate model for this persona
+            switchToDefaultModel(for: targetPersona)
+        } else {
+            // No persona in message - use current session persona
+            targetPersona = PersonaSessionManager.shared.getCurrentPersona()
+        }
+        
+        // Compose message with potentially cleaned text
         let messageContent = MessageComposer.compose(
-            text: trimmedText,
+            text: finalText,
             files: fileDropHandler.droppedFiles
         )
         
@@ -52,14 +71,11 @@ class InputBarCoordinator: ObservableObject {
         state.clearInput()
         fileDropHandler.clearFiles()
         
-        // Determine persona based on current model
-        let currentPersona = determinePersonaFromSelectedModel()
-        
-        // Send message
+        // Send message with detected or current persona
         await conversationOrchestrator.sendMessageWithAttachments(
             messageContent,
             attachments: attachments,
-            persona: currentPersona
+            persona: targetPersona
         )
         
         // Handle turn mode
@@ -123,8 +139,8 @@ class InputBarCoordinator: ObservableObject {
     /// Handle text changes to detect persona and switch models
     func handleTextChange(_ text: String) {
         // Detect persona from input
-        if let detectedPersona = PersonaDetector.detectPersona(from: text) {
-            switchToDefaultModel(for: detectedPersona)
+        if let detected = PersonaDetector.detectPersona(from: text) {
+            switchToDefaultModel(for: detected.persona)
         }
     }
     
@@ -139,6 +155,8 @@ class InputBarCoordinator: ObservableObject {
             return
         }
         
+        print("Switching to persona: \(persona), model: \(defaultModel)")
+        
         // Switch to the model with provider prefix
         let modelWithPrefix = switch personaType {
         case .claude:
@@ -146,20 +164,12 @@ class InputBarCoordinator: ObservableObject {
         case .nonClaude:
             "openai:\(defaultModel)"
         }
+        
+        print("Setting selectedModel to: \(modelWithPrefix)")
         runtimeModelManager.selectedModel = modelWithPrefix
+        
+        // Verify the model was set
+        print("Current selectedModel: \(runtimeModelManager.selectedModel)")
     }
     
-    /// Determine persona based on the currently selected model
-    private func determinePersonaFromSelectedModel() -> String {
-        let selectedModel = runtimeModelManager.selectedModel
-        
-        // Check if it's an Anthropic model
-        if selectedModel.hasPrefix("anthropic:") {
-            return "claude"
-        }
-        
-        // For non-Anthropic models, use a default persona
-        // In the future, this could be more sophisticated
-        return "assistant"
-    }
 }
