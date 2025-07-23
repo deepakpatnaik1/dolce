@@ -6,35 +6,22 @@
 //
 //  ATOMIC RESPONSIBILITY: Input presentation only
 //  - Render glassmorphic input interface using DesignTokens
-//  - Handle user text input events and dynamic height
-//  - Provide clean input experience with send button
+//  - Display text field and control buttons
+//  - Show attachment previews
 //  - Zero business logic - pure presentation layer
 //
 
 import SwiftUI
 
 struct InputBarView: View {
-    @State private var inputText: String = ""
-    @State private var textHeight: CGFloat
+    @StateObject private var state = InputBarState()
     @FocusState private var isInputFocused: Bool
-    @ObservedObject var conversationOrchestrator: ConversationOrchestrator
-    @ObservedObject var messageStore: MessageStore
-    @ObservedObject var fileDropHandler: FileDropHandler
     @StateObject private var focusGuardian = FocusGuardian.shared
-    @ObservedObject private var turnModeCoordinator = TurnModeCoordinator.shared
+    
+    @ObservedObject var fileDropHandler: FileDropHandler
+    let coordinator: InputBarCoordinator
     
     private let tokens = DesignTokens.shared
-    
-    init(conversationOrchestrator: ConversationOrchestrator, messageStore: MessageStore, fileDropHandler: FileDropHandler) {
-        self.conversationOrchestrator = conversationOrchestrator
-        self.messageStore = messageStore
-        self.fileDropHandler = fileDropHandler
-        
-        // Calculate single-line height for initial state using TextMeasurementEngine
-        let font = NSFont(name: DesignTokens.shared.typography.bodyFont, size: 12) ?? NSFont.systemFont(ofSize: 12)
-        let lineHeight = TextMeasurementEngine.calculateLineHeight(for: font)
-        _textHeight = State(initialValue: lineHeight)
-    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -49,6 +36,9 @@ struct InputBarView: View {
         .onAppear {
             isInputFocused = true
         }
+        .onChange(of: state.text) { _, newValue in
+            state.updateHeight(for: newValue)
+        }
     }
     
     // MARK: - Computed Properties for View Composition
@@ -62,12 +52,12 @@ struct InputBarView: View {
     
     private var textInputSection: some View {
         ZStack(alignment: .bottomLeading) {
-            TextField("", text: $inputText, axis: .vertical)
+            TextField("", text: $state.text, axis: .vertical)
                 .font(.custom(tokens.typography.bodyFont, size: 12))
                 .foregroundColor(.white)
                 .focused($isInputFocused)
                 .textFieldStyle(PlainTextFieldStyle())
-                .frame(height: textHeight)
+                .frame(height: state.textHeight)
                 .padding(.horizontal, tokens.elements.inputBar.textPadding)
                 .padding(.top, tokens.elements.inputBar.topPadding)
                 .padding(.bottom, tokens.elements.inputBar.topPadding)
@@ -77,20 +67,16 @@ struct InputBarView: View {
                 .onKeyPress { keyPress in
                     switch KeyboardCommandRouter.routeKeyPress(keyPress) {
                     case .sendMessage:
-                        sendMessage()
+                        Task {
+                            await coordinator.handleSendAction(text: state.text, state: state)
+                        }
                         return .handled
                     case .addNewLine:
                         // Let TextField handle naturally for new line
                         return .ignored
-                    case .turnNavigateUp:
-                        turnModeCoordinator.handleKeyboardCommand(TurnKeyboardRouter.TurnKeyboardAction.navigateUp, messages: messageStore.messages)
-                        return .handled
-                    case .turnNavigateDown:
-                        turnModeCoordinator.handleKeyboardCommand(TurnKeyboardRouter.TurnKeyboardAction.navigateDown, messages: messageStore.messages)
-                        return .handled
-                    case .turnModeExit:
-                        turnModeCoordinator.handleKeyboardCommand(TurnKeyboardRouter.TurnKeyboardAction.exitTurnMode, messages: messageStore.messages)
-                        return .handled
+                    case .turnNavigateUp, .turnNavigateDown, .turnModeExit:
+                        // Turn navigation handled elsewhere
+                        return .ignored
                     case .ignore:
                         return .ignored
                     }
@@ -106,16 +92,15 @@ struct InputBarView: View {
                     }
                 }
         }
-        .onChange(of: inputText) { _, newValue in
-            updateTextHeight(for: newValue)
-        }
     }
     
     private var bottomControlsSection: some View {
         HStack(spacing: tokens.elements.inputBar.controlsSpacing) {
             // Plus button - trigger file picker
             Button(action: {
-                openFilePicker()
+                Task {
+                    await coordinator.handleFilePickAction()
+                }
             }) {
                 Image(systemName: "plus")
                     .font(.system(size: 14, weight: .medium))
@@ -130,9 +115,11 @@ struct InputBarView: View {
             Spacer()
             
             // Send button (only show when text present)
-            if !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if state.hasText {
                 Button(action: {
-                    sendMessage()
+                    Task {
+                        await coordinator.handleSendAction(text: state.text, state: state)
+                    }
                 }) {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.system(size: tokens.elements.buttons.sendSize, weight: .medium))
@@ -184,105 +171,4 @@ struct InputBarView: View {
             )
     }
     
-    // MARK: - Private Functions
-    
-    private func sendMessage() {
-        let trimmedText = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let hasText = !trimmedText.isEmpty
-        let hasFiles = !fileDropHandler.droppedFiles.isEmpty
-        
-        guard hasText || hasFiles else { return }
-        
-        // Prepare message content
-        var messageContent = trimmedText
-        
-        // Add file content if present
-        if hasFiles {
-            let fileContent = FileProcessor.processFilesForChat(fileDropHandler.droppedFiles)
-            if hasText {
-                messageContent = "\(trimmedText)\n\n\(fileContent)"
-            } else {
-                messageContent = FileProcessor.generateChatSummary(fileDropHandler.droppedFiles) + "\n\n\(fileContent)"
-            }
-        }
-        
-        // Clear input and files
-        inputText = ""
-        let attachments = fileDropHandler.droppedFiles
-        fileDropHandler.clearFiles()
-        
-        Task {
-            await conversationOrchestrator.sendMessageWithAttachments(messageContent, attachments: attachments)
-            
-            // Handle turn mode: if in turn mode, move to latest turn to show new conversation
-            if TurnManager.shared.isInTurnMode {
-                turnModeCoordinator.handleNewMessageInTurnMode(messages: messageStore.messages)
-            }
-        }
-    }
-    
-    private func openFilePicker() {
-        let panel = NSOpenPanel()
-        panel.allowsMultipleSelection = true
-        panel.canChooseDirectories = false
-        panel.canChooseFiles = true
-        panel.allowedContentTypes = [.image, .pdf, .plainText, .sourceCode, .json]
-        
-        if panel.runModal() == .OK {
-            for url in panel.urls {
-                if let data = try? Data(contentsOf: url) {
-                    let name = url.lastPathComponent
-                    let size = Int64(data.count)
-                    let fileType = DroppedFile.FileType.from(filename: name)
-                    
-                    // Check file size (10MB limit)
-                    if size <= 10 * 1024 * 1024 {
-                        let previewText = extractPreviewText(from: data, type: fileType)
-                        let droppedFile = DroppedFile(
-                            name: name,
-                            type: fileType,
-                            size: size,
-                            data: data,
-                            previewText: previewText
-                        )
-                        fileDropHandler.addFile(droppedFile)
-                    }
-                }
-            }
-        }
-    }
-    
-    private func extractPreviewText(from data: Data, type: DroppedFile.FileType) -> String? {
-        switch type {
-        case .text, .markdown, .code:
-            return String(data: data, encoding: .utf8) ?? String(data: data, encoding: .ascii)
-        case .image:
-            return "Image file (\(data.count) bytes)"
-        case .pdf:
-            return "PDF document (\(data.count) bytes)"
-        case .unknown:
-            return "Binary file (\(data.count) bytes)"
-        }
-    }
-    
-    private func updateTextHeight(for text: String) {
-        let font = NSFont(name: tokens.typography.bodyFont, size: 12) ?? NSFont.systemFont(ofSize: 12)
-        let contentWidth: CGFloat = tokens.layout.sizing["contentWidth"] ?? 592
-        let availableWidth = contentWidth - (tokens.elements.inputBar.textPadding * 2)
-        
-        // Use TextMeasurementEngine for height calculation
-        let newHeight = TextMeasurementEngine.calculateHeight(
-            for: text,
-            font: font, 
-            availableWidth: availableWidth
-        )
-        
-        // Use HeightAnimationEngine for smooth animation
-        HeightAnimationEngine.animateHeightChange(
-            from: textHeight,
-            to: newHeight
-        ) { [self] height in
-            textHeight = height
-        }
-    }
 }

@@ -11,11 +11,21 @@ struct ContentView: View {
     @StateObject private var messageStore = MessageStore()
     @StateObject private var conversationOrchestrator: ConversationOrchestrator
     @StateObject private var fileDropHandler = FileDropHandler()
+    @StateObject private var inputBarCoordinator: InputBarCoordinator
     
     init() {
         let messageStore = MessageStore()
+        let conversationOrchestrator = ConversationOrchestrator(messageStore: messageStore)
+        let fileDropHandler = FileDropHandler()
+        
         self._messageStore = StateObject(wrappedValue: messageStore)
-        self._conversationOrchestrator = StateObject(wrappedValue: ConversationOrchestrator(messageStore: messageStore))
+        self._conversationOrchestrator = StateObject(wrappedValue: conversationOrchestrator)
+        self._fileDropHandler = StateObject(wrappedValue: fileDropHandler)
+        self._inputBarCoordinator = StateObject(wrappedValue: InputBarCoordinator(
+            conversationOrchestrator: conversationOrchestrator,
+            fileDropHandler: fileDropHandler,
+            messageStore: messageStore
+        ))
     }
     
     var body: some View {
@@ -35,9 +45,8 @@ struct ContentView: View {
                 
                 // Beautiful InputBarView with glassmorphic styling
                 InputBarView(
-                    conversationOrchestrator: conversationOrchestrator, 
-                    messageStore: messageStore,
-                    fileDropHandler: fileDropHandler
+                    fileDropHandler: fileDropHandler,
+                    coordinator: inputBarCoordinator
                 )
             }
             
