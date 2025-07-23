@@ -53,7 +53,7 @@ struct ScrollbackView: View {
     
     @ViewBuilder
     private func messageContent(_ message: ChatMessage) -> some View {
-        MessageContentView(content: message.content)
+        MessageContentView(content: message.content, accentColor: getPersonaColor(for: message))
             .font(.custom(tokens.typography.bodyFont, size: tokens.elements.scrollback.bodyFontSize))
             .foregroundColor(.white)
             .multilineTextAlignment(.leading)
