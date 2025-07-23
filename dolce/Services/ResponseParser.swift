@@ -81,6 +81,12 @@ struct ResponseParser {
     
     /// Parse OpenAI streaming response line
     static func parseOpenAIStreamingLine(_ line: String) -> StreamingChunk {
+        // Skip empty lines
+        let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedLine.isEmpty {
+            return StreamingChunk(content: nil, isComplete: false, error: nil)
+        }
+        
         // Handle OpenAI's Server-Sent Events format
         if line.hasPrefix("data: ") {
             let jsonString = String(line.dropFirst(6))
@@ -90,10 +96,16 @@ struct ResponseParser {
                 return StreamingChunk(content: nil, isComplete: true, error: nil)
             }
             
+            // Skip empty data
+            if jsonString.trimmingCharacters(in: .whitespaces).isEmpty {
+                return StreamingChunk(content: nil, isComplete: false, error: nil)
+            }
+            
             // Parse JSON chunk
             guard let data = jsonString.data(using: .utf8),
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-                return StreamingChunk(content: nil, isComplete: false, error: "Invalid JSON")
+                // Don't treat parse failures as errors - just skip the chunk
+                return StreamingChunk(content: nil, isComplete: false, error: nil)
             }
             
             // Extract content from choices (handle null content gracefully)
@@ -106,6 +118,7 @@ struct ResponseParser {
             
             // Check for completion
             if let choices = json["choices"] as? [[String: Any]],
+               !choices.isEmpty,
                let firstChoice = choices.first,
                let _ = firstChoice["finish_reason"] as? String {
                 return StreamingChunk(content: nil, isComplete: true, error: nil)

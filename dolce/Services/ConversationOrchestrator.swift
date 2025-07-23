@@ -79,11 +79,24 @@ class ConversationOrchestrator: ObservableObject {
             // Build request
             let request = try buildRequest(message: userMessage, config: config)
             
-            // Execute streaming request
-            let responseStream = try await HTTPExecutor.executeStreamingRequest(request)
-            
-            // Process response stream
-            await processResponseStream(responseStream, config: config, messageId: streamingMessageId)
+            // Handle OpenAI non-streaming response
+            if config.provider == .openai {
+                // Execute non-streaming request
+                let (data, _) = try await HTTPExecutor.executeRequest(request)
+                
+                // Parse complete response
+                if let parsedResponse = ResponseParser.parseResponse(data, provider: config.provider) {
+                    messageStore.updateMessage(id: streamingMessageId, content: parsedResponse.content)
+                } else {
+                    messageStore.updateMessage(id: streamingMessageId, content: "Error: Could not parse response")
+                }
+            } else {
+                // Execute streaming request for other providers
+                let responseStream = try await HTTPExecutor.executeStreamingRequest(request)
+                
+                // Process response stream
+                await processResponseStream(responseStream, config: config, messageId: streamingMessageId)
+            }
             
         } catch {
             addErrorMessage("Error: \(error.localizedDescription)")
@@ -100,7 +113,7 @@ class ConversationOrchestrator: ObservableObject {
                 message: message,
                 model: config.model,
                 maxTokens: config.maxTokens,
-                streaming: true
+                streaming: false  // Temporarily disabled for debugging
             )
         case .anthropic:
             requestBody = RequestBodyBuilder.buildSingleMessageBody(

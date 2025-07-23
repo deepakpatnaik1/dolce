@@ -52,10 +52,14 @@ class InputBarCoordinator: ObservableObject {
         state.clearInput()
         fileDropHandler.clearFiles()
         
+        // Determine persona based on current model
+        let currentPersona = determinePersonaFromSelectedModel()
+        
         // Send message
         await conversationOrchestrator.sendMessageWithAttachments(
             messageContent,
-            attachments: attachments
+            attachments: attachments,
+            persona: currentPersona
         )
         
         // Handle turn mode
@@ -135,7 +139,27 @@ class InputBarCoordinator: ObservableObject {
             return
         }
         
-        // Switch to the model
-        runtimeModelManager.selectedModel = defaultModel
+        // Switch to the model with provider prefix
+        let modelWithPrefix = switch personaType {
+        case .claude:
+            "anthropic:\(defaultModel)"
+        case .nonClaude:
+            "openai:\(defaultModel)"
+        }
+        runtimeModelManager.selectedModel = modelWithPrefix
+    }
+    
+    /// Determine persona based on the currently selected model
+    private func determinePersonaFromSelectedModel() -> String {
+        let selectedModel = runtimeModelManager.selectedModel
+        
+        // Check if it's an Anthropic model
+        if selectedModel.hasPrefix("anthropic:") {
+            return "claude"
+        }
+        
+        // For non-Anthropic models, use a default persona
+        // In the future, this could be more sophisticated
+        return "assistant"
     }
 }
