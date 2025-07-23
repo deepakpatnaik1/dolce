@@ -151,11 +151,8 @@ class InputBarCoordinator: ObservableObject {
         
         // Get default model for persona type
         guard let defaultModel = PersonaMappingLoader.getDefaultModel(for: personaType) else {
-            print("No default model found for persona type: \(personaType)")
             return
         }
-        
-        print("Switching to persona: \(persona), model: \(defaultModel)")
         
         // Switch to the model with provider prefix
         let modelWithPrefix = switch personaType {
@@ -165,11 +162,7 @@ class InputBarCoordinator: ObservableObject {
             "openai:\(defaultModel)"
         }
         
-        print("Setting selectedModel to: \(modelWithPrefix)")
         runtimeModelManager.selectedModel = modelWithPrefix
-        
-        // Verify the model was set
-        print("Current selectedModel: \(runtimeModelManager.selectedModel)")
     }
     
 }

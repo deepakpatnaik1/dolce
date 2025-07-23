@@ -60,12 +60,4 @@ class MessageStore: ObservableObject {
         messages.removeAll()
     }
     
-    // MARK: - Sample Data (for development)
-    
-    /// Add sample messages for UI development
-    func loadSampleMessages() {
-        addMessage(content: "Hello! I'm building Dolce with atomic LEGO components.", author: "Boss")
-        addMessage(content: "That's a great approach! Atomic components make the codebase much more maintainable than the original aether implementation.", author: "AI", persona: "claude")
-        addMessage(content: "Can you explain the memory system architecture?", author: "Boss")
-    }
 }

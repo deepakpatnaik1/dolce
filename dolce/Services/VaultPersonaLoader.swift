@@ -47,7 +47,7 @@ struct VaultPersonaLoader {
             return personas.map { $0.lowercased() }
             
         } catch {
-            print("Error discovering personas: \(error)")
+            // Silently return empty array on error
             return []
         }
     }

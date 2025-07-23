@@ -1,0 +1,17 @@
+{
+  "fileHandling": {
+    "maxFileSizeMB": 10,
+    "contentTruncation": {
+      "filePreviewChars": 2000,
+      "messageContentChars": 3000
+    }
+  },
+  "conversation": {
+    "defaultPersona": "claude",
+    "maxHistoryLength": 50,
+    "temperature": 0.7
+  },
+  "defaults": {
+    "fallbackProvider": "anthropic"
+  }
+}

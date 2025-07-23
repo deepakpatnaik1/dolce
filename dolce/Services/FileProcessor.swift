@@ -95,8 +95,9 @@ struct FileProcessor {
         
         // Trim and limit content
         extractedText = extractedText.trimmingCharacters(in: .whitespacesAndNewlines)
-        if extractedText.count > 2000 {
-            extractedText = String(extractedText.prefix(2000)) + "...\n\n[Content truncated - full PDF available]"
+        let charLimit = AppConfigurationLoader.filePreviewCharLimit
+        if extractedText.count > charLimit {
+            extractedText = String(extractedText.prefix(charLimit)) + "...\n\n[Content truncated - full PDF available]"
         }
         
         let suffix = pageCount > maxPages ? " (showing first \(maxPages) of \(pageCount) pages)" : ""
@@ -117,8 +118,9 @@ struct FileProcessor {
         var content = text
         
         // Limit very long text files
-        if content.count > 3000 {
-            content = String(content.prefix(3000)) + "...\n\n[Content truncated - full file available]"
+        let contentLimit = AppConfigurationLoader.messageContentCharLimit
+        if content.count > contentLimit {
+            content = String(content.prefix(contentLimit)) + "...\n\n[Content truncated - full file available]"
         }
         
         return """

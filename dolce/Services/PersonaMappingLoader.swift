@@ -45,7 +45,7 @@ struct PersonaMappingLoader {
             cachedConfig = config
             return config
         } catch {
-            print("Error loading persona mapping config: \(error)")
+            // Silently return nil on error
             return nil
         }
     }

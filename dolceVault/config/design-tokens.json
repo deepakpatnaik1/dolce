@@ -9,7 +9,9 @@
     },
     "margins": {},
     "sizing": {
-      "contentWidth": 592
+      "contentWidth": 592,
+      "windowWidth": 1000,
+      "windowHeight": 700
     },
     "chrome": {
       "titleBarHeight": 28,

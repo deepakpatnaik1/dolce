@@ -106,10 +106,10 @@ struct APIConfigurationProvider {
     /// Get default conversation settings
     static func getConversationSettings() -> ConversationSettings {
         return ConversationSettings(
-            defaultPersona: "claude",
-            maxHistoryLength: 50,
+            defaultPersona: AppConfigurationLoader.defaultPersona,
+            maxHistoryLength: AppConfigurationLoader.maxHistoryLength,
             streamingEnabled: true,
-            temperature: 0.7
+            temperature: AppConfigurationLoader.temperature
         )
     }
     
@@ -134,7 +134,7 @@ struct APIConfigurationProvider {
     /// Extract provider ID from model key (e.g., "anthropic:claude-3-5-sonnet" -> "anthropic")
     private static func extractProviderId(from modelKey: String) -> String {
         let parts = modelKey.components(separatedBy: ":")
-        return parts.count > 1 ? parts[0] : "anthropic"
+        return parts.count > 1 ? parts[0] : AppConfigurationLoader.fallbackProvider
     }
     
     /// Extract model ID from model key (removes provider prefix)

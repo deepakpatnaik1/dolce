@@ -24,12 +24,13 @@ class PersonaSessionManager: ObservableObject {
         // Start with default persona based on the default model
         let defaultModel = RuntimeModelManager.shared.selectedModel
         
-        if defaultModel.hasPrefix("anthropic:") {
-            self.currentPersona = "claude"
+        let defaultPersona = AppConfigurationLoader.defaultPersona
+        if PersonaProvider.isValidPersona(defaultPersona) {
+            self.currentPersona = defaultPersona
         } else {
-            // Default to first available non-Claude persona
+            // Fallback to first available persona
             let personas = VaultPersonaLoader.discoverPersonas()
-            self.currentPersona = personas.first(where: { $0 != "claude" }) ?? "assistant"
+            self.currentPersona = personas.first ?? "assistant"
         }
     }
     
@@ -45,13 +46,12 @@ class PersonaSessionManager: ObservableObject {
     
     /// Reset to default persona
     func resetToDefault() {
-        let defaultModel = RuntimeModelManager.shared.selectedModel
-        
-        if defaultModel.hasPrefix("anthropic:") {
-            currentPersona = "claude"
+        let defaultPersona = AppConfigurationLoader.defaultPersona
+        if PersonaProvider.isValidPersona(defaultPersona) {
+            currentPersona = defaultPersona
         } else {
             let personas = VaultPersonaLoader.discoverPersonas()
-            currentPersona = personas.first(where: { $0 != "claude" }) ?? "assistant"
+            currentPersona = personas.first ?? "assistant"
         }
     }
 }

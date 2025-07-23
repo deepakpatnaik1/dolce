@@ -15,18 +15,18 @@ import Foundation
 
 struct PersonaProvider {
     
-    /// Get available personas
+    /// Get available personas from vault
     static func getAvailablePersonas() -> [String] {
-        return ["claude", "samara", "vanessa", "vlad", "lyra", "eva", "alicja", "sonja", "gunnar"]
+        return VaultPersonaLoader.discoverPersonas()
     }
     
     /// Check if persona is valid
     static func isValidPersona(_ persona: String) -> Bool {
-        return getAvailablePersonas().contains(persona.lowercased())
+        return VaultPersonaLoader.personaExists(persona)
     }
     
-    /// Get default persona
+    /// Get default persona from configuration
     static func getDefaultPersona() -> String {
-        return "claude"
+        return AppConfigurationLoader.defaultPersona
     }
 }

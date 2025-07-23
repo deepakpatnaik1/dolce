@@ -66,6 +66,10 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
-        .frame(width: 1000, height: 700)
+    let tokens = DesignTokens.shared
+    return ContentView()
+        .frame(
+            width: tokens.layout.sizing["windowWidth"] ?? 1000,
+            height: tokens.layout.sizing["windowHeight"] ?? 700
+        )
 }

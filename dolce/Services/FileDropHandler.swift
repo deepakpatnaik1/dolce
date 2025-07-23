@@ -33,8 +33,8 @@ class FileDropHandler: ObservableObject {
         .xml
     ]
     
-    // Maximum file size (10MB)
-    private let maxFileSize: Int64 = 10 * 1024 * 1024
+    // Maximum file size from configuration
+    private var maxFileSize: Int64 { AppConfigurationLoader.maxFileSize }
     
     func handleDrop(providers: [NSItemProvider]) -> Bool {
         Task {

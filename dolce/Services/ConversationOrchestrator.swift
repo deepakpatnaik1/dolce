@@ -26,23 +26,25 @@ class ConversationOrchestrator: ObservableObject {
     // MARK: - Public Interface
     
     /// Send user message and orchestrate AI response
-    func sendMessage(_ content: String, persona: String = "claude") async {
+    func sendMessage(_ content: String, persona: String? = nil) async {
         // Add user message immediately
         let userMessage = ChatMessage(content: content, author: "User", persona: nil)
         messageStore.addMessage(userMessage)
         
         // Get AI response
-        await getAIResponse(for: content, persona: persona)
+        let activePersona = persona ?? PersonaSessionManager.shared.getCurrentPersona()
+        await getAIResponse(for: content, persona: activePersona)
     }
     
     /// Send user message with attachments and orchestrate AI response
-    func sendMessageWithAttachments(_ content: String, attachments: [DroppedFile], persona: String = "claude") async {
+    func sendMessageWithAttachments(_ content: String, attachments: [DroppedFile], persona: String? = nil) async {
         // Add user message with attachments immediately
         let userMessage = ChatMessage(content: content, author: "User", persona: nil, attachments: attachments)
         messageStore.addMessage(userMessage)
         
         // Get AI response (content already includes processed file data)
-        await getAIResponse(for: content, persona: persona)
+        let activePersona = persona ?? PersonaSessionManager.shared.getCurrentPersona()
+        await getAIResponse(for: content, persona: activePersona)
     }
     
     /// Check if conversation system is ready

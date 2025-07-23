@@ -15,8 +15,8 @@ import Foundation
 
 struct FileValidator {
     
-    // Maximum file size (10MB)
-    static let maxFileSize: Int64 = 10 * 1024 * 1024
+    // Maximum file size from configuration
+    static var maxFileSize: Int64 { AppConfigurationLoader.maxFileSize }
     
     // Validation result
     struct ValidationResult {
@@ -35,7 +35,8 @@ struct FileValidator {
             switch self {
             case .fileTooLarge(let name, let size):
                 let sizeMB = Double(size) / (1024 * 1024)
-                return "File too large: \(name) (\(String(format: "%.1f", sizeMB))MB, max 10MB)"
+                let maxMB = Double(maxFileSize) / (1024 * 1024)
+                return "File too large: \(name) (\(String(format: "%.1f", sizeMB))MB, max \(String(format: "%.0f", maxMB))MB)"
             case .unableToGetFileSize(let name):
                 return "Unable to determine size of file: \(name)"
             }
