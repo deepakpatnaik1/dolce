@@ -92,12 +92,31 @@ class ConversationOrchestrator: ObservableObject {
     
     /// Build API request using configuration
     private func buildRequest(message: String, config: APIConfiguration) throws -> URLRequest {
-        let requestBody = RequestBodyBuilder.buildSingleMessageBody(
-            message: message,
-            model: config.model,
-            maxTokens: config.maxTokens,
-            streaming: true
-        )
+        // Build provider-specific request body
+        let requestBody: [String: Any]
+        switch config.provider {
+        case .openai:
+            requestBody = RequestBodyBuilder.buildOpenAIBody(
+                message: message,
+                model: config.model,
+                maxTokens: config.maxTokens,
+                streaming: true
+            )
+        case .anthropic:
+            requestBody = RequestBodyBuilder.buildSingleMessageBody(
+                message: message,
+                model: config.model,
+                maxTokens: config.maxTokens,
+                streaming: true
+            )
+        @unknown default:
+            requestBody = RequestBodyBuilder.buildSingleMessageBody(
+                message: message,
+                model: config.model,
+                maxTokens: config.maxTokens,
+                streaming: true
+            )
+        }
         
         return try HTTPRequestBuilder.buildRequest(
             baseURL: config.baseURL,

@@ -69,4 +69,28 @@ struct RequestBodyBuilder {
             additionalParams: additionalParams
         )
     }
+    
+    /// Build OpenAI-specific request body
+    static func buildOpenAIBody(
+        message: String,
+        model: String,
+        maxTokens: Int,
+        streaming: Bool = true
+    ) -> [String: Any] {
+        
+        let messages: [[String: Any]] = [
+            [
+                "role": "user",
+                "content": message
+            ]
+        ]
+        
+        return [
+            "model": model,
+            "messages": messages,
+            "max_tokens": maxTokens,
+            "stream": streaming,
+            "temperature": 0.7
+        ]
+    }
 }

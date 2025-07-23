@@ -1,5 +1,4 @@
 {
-  "defaultModel": "anthropic:claude-sonnet-4-20250514",
   "providers": {
     "anthropic": {
       "name": "Anthropic",
@@ -22,6 +21,21 @@
       "additionalHeaders": {
         "anthropic-version": "2023-06-01"
       }
+    },
+    "openai": {
+      "name": "OpenAI",
+      "apiKeyIdentifier": "OPENAI_API_KEY",
+      "baseURL": "https://api.openai.com",
+      "endpoint": "/v1/chat/completions",
+      "authHeader": "Authorization",
+      "authPrefix": "Bearer ",
+      "models": [
+        {
+          "key": "gpt-4.1-mini-2025-04-14",
+          "displayName": "GPT-4.1 Mini",
+          "maxTokens": 16000
+        }
+      ]
     }
   }
 }

@@ -73,7 +73,7 @@ struct APIConfigurationProvider {
             apiKey = fetchedKey
             
             let authValue = if let prefix = providerConfig.authPrefix {
-                "\(prefix) \(fetchedKey)"
+                "\(prefix)\(fetchedKey)"
             } else {
                 fetchedKey
             }

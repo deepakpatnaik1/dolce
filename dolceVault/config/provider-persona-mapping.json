@@ -1,7 +1,7 @@
 {
   "defaultModels": {
     "claudeProvider": "claude-3-5-sonnet-20241022",
-    "nonClaudeProvider": "gpt-4o-mini"
+    "nonClaudeProvider": "gpt-4.1-mini-2025-04-14"
   },
   "providerExclusivePersonas": {
     "anthropic": ["claude"]

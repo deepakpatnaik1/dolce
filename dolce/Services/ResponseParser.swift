@@ -154,6 +154,20 @@ struct ResponseParser {
         }
     }
     
+    /// Parse streaming line based on provider string
+    static func parseStreamingLine(_ line: String, provider: String) -> StreamingChunk {
+        let apiProvider: APIProvider
+        switch provider.lowercased() {
+        case "anthropic":
+            apiProvider = .anthropic
+        case "openai":
+            apiProvider = .openai
+        default:
+            return StreamingChunk(content: "", isComplete: false, error: nil)
+        }
+        return parseStreamingLine(line, provider: apiProvider)
+    }
+    
     /// Parse complete response based on provider
     static func parseResponse(_ data: Data, provider: APIProvider) -> ParsedResponse? {
         switch provider {
