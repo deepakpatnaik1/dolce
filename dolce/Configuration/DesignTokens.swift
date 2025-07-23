@@ -225,19 +225,18 @@ struct DesignTokens: Codable {
     }
     
     static let shared: DesignTokens = {
-        guard let url = Bundle.main.url(forResource: "DesignTokens", withExtension: "json") else {
-            fatalError("Could not find DesignTokens.json in bundle")
-        }
+        let configPath = "/Users/d.patnaik/code/dolce/dolceVault/config/design-tokens.json"
+        let url = URL(fileURLWithPath: configPath)
         
         guard let data = try? Data(contentsOf: url) else {
-            fatalError("Could not read DesignTokens.json data")
+            fatalError("Could not read design-tokens.json from vault")
         }
         
         do {
             let tokens = try JSONDecoder().decode(DesignTokens.self, from: data)
             return tokens
         } catch {
-            fatalError("Could not decode DesignTokens.json: \(error)")
+            fatalError("Could not decode design-tokens.json: \(error)")
         }
     }()
 }

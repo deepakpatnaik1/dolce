@@ -19,6 +19,7 @@ class InputBarCoordinator: ObservableObject {
     private let fileDropHandler: FileDropHandler
     private let turnModeCoordinator = TurnModeCoordinator.shared
     private let messageStore: MessageStore
+    private let runtimeModelManager = RuntimeModelManager.shared
     
     init(conversationOrchestrator: ConversationOrchestrator, 
          fileDropHandler: FileDropHandler,
@@ -111,5 +112,30 @@ class InputBarCoordinator: ObservableObject {
             // Log validation error but continue
             print("File validation failed: \(error)")
         }
+    }
+    
+    // MARK: - Persona Detection and Model Switching
+    
+    /// Handle text changes to detect persona and switch models
+    func handleTextChange(_ text: String) {
+        // Detect persona from input
+        if let detectedPersona = PersonaDetector.detectPersona(from: text) {
+            switchToDefaultModel(for: detectedPersona)
+        }
+    }
+    
+    /// Switch to the default model for the given persona
+    private func switchToDefaultModel(for persona: String) {
+        // Determine persona type
+        let personaType: PersonaMappingLoader.PersonaType = (persona == "claude") ? .claude : .nonClaude
+        
+        // Get default model for persona type
+        guard let defaultModel = PersonaMappingLoader.getDefaultModel(for: personaType) else {
+            print("No default model found for persona type: \(personaType)")
+            return
+        }
+        
+        // Switch to the model
+        runtimeModelManager.selectedModel = defaultModel
     }
 }

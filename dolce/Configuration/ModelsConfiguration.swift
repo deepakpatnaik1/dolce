@@ -20,16 +20,15 @@ struct ModelsConfiguration: Codable {
     let providers: [String: ProviderConfiguration]
     
     static let shared: ModelsConfiguration = {
-        guard let url = Bundle.main.url(forResource: "Models", withExtension: "json") else {
-            fatalError("❌ Models.json not found in app bundle")
-        }
+        let configPath = "/Users/d.patnaik/code/dolce/dolceVault/config/models.json"
+        let url = URL(fileURLWithPath: configPath)
         
         do {
             let data = try Data(contentsOf: url)
             let configuration = try JSONDecoder().decode(ModelsConfiguration.self, from: data)
             return configuration
         } catch {
-            fatalError("Failed to load Models.json: \(error)")
+            fatalError("Failed to load models.json from vault: \(error)")
         }
     }()
 }

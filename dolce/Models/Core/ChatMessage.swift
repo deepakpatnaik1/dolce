@@ -48,7 +48,7 @@ struct ChatMessage: Identifiable, Codable, Equatable {
     
     var displayAuthor: String {
         if isFromBoss {
-            return "Boss"
+            return VaultPersonaLoader.getBossLabel()
         }
         return persona?.capitalized ?? author
     }

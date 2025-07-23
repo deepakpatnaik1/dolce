@@ -38,6 +38,7 @@ struct InputBarView: View {
         }
         .onChange(of: state.text) { _, newValue in
             state.updateHeight(for: newValue)
+            coordinator.handleTextChange(newValue)
         }
     }
     
