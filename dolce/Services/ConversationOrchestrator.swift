@@ -35,6 +35,16 @@ class ConversationOrchestrator: ObservableObject {
         await getAIResponse(for: content, persona: persona)
     }
     
+    /// Send user message with attachments and orchestrate AI response
+    func sendMessageWithAttachments(_ content: String, attachments: [DroppedFile], persona: String = "claude") async {
+        // Add user message with attachments immediately
+        let userMessage = ChatMessage(content: content, author: "User", persona: nil, attachments: attachments)
+        messageStore.addMessage(userMessage)
+        
+        // Get AI response (content already includes processed file data)
+        await getAIResponse(for: content, persona: persona)
+    }
+    
     /// Check if conversation system is ready
     func isReady() -> Bool {
         return APIConfigurationProvider.isConfigurationValid()

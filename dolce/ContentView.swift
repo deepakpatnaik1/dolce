@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var messageStore = MessageStore()
     @StateObject private var conversationOrchestrator: ConversationOrchestrator
+    @StateObject private var fileDropHandler = FileDropHandler()
     
     init() {
         let messageStore = MessageStore()
@@ -33,11 +34,24 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 // Beautiful InputBarView with glassmorphic styling
-                InputBarView(conversationOrchestrator: conversationOrchestrator, messageStore: messageStore)
+                InputBarView(
+                    conversationOrchestrator: conversationOrchestrator, 
+                    messageStore: messageStore,
+                    fileDropHandler: fileDropHandler
+                )
             }
+            
+            // Full-window drag-drop overlay
+            DragDropZone(
+                isVisible: fileDropHandler.isHovering,
+                isDragHovering: fileDropHandler.isHovering
+            )
         }
         .onAppear {
             // App initialization
+        }
+        .onDrop(of: [.fileURL, .image, .pdf, .plainText], isTargeted: $fileDropHandler.isHovering) { providers in
+            fileDropHandler.handleDrop(providers: providers)
         }
     }
 }

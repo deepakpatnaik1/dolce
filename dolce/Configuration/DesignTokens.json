@@ -28,7 +28,9 @@
       "borderTop": 0.3,
       "borderBottom": 0.1,
       "placeholder": 0.25,
-      "controls": 0.7
+      "controls": 0.7,
+      "dropZoneBackground": 0.3,
+      "dropZoneCenter": 0.6
     },
     "gradients": {
       "borderColors": ["white", "white"],

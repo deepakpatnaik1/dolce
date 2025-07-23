@@ -45,6 +45,8 @@ struct DesignTokens: Codable {
             let borderBottom: Double
             let placeholder: Double
             let controls: Double
+            let dropZoneBackground: Double
+            let dropZoneCenter: Double
         }
         
         struct Gradients: Codable {
