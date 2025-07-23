@@ -68,7 +68,7 @@ class OpenAIService {
     }
     
     /// Parse OpenAI streaming response line
-    static func parseStreamingLine(_ line: String) -> StreamChunk {
+    static func parseStreamingLine(_ line: String) -> StreamingChunk {
         return ResponseParser.parseStreamingLine(line, provider: "openai")
     }
 }
