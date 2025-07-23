@@ -14,7 +14,7 @@
 import Foundation
 
 struct PersonaMappingLoader {
-    private static let configPath = "/Users/d.patnaik/code/dolce/dolceVault/config/provider-persona-mapping.json"
+    private static var configPath: String { VaultPathProvider.configPath(for: "provider-persona-mapping.json") }
     
     enum PersonaType {
         case claude

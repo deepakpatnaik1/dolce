@@ -14,9 +14,9 @@
 import Foundation
 
 struct VaultPersonaLoader {
-    private static let vaultPath = "/Users/d.patnaik/code/dolce/dolceVault"
-    private static let bossPath = "\(vaultPath)/playbook/boss"
-    private static let personasPath = "\(vaultPath)/playbook/personas"
+    private static var vaultPath: String { VaultPathProvider.vaultPath }
+    private static var bossPath: String { VaultPathProvider.bossPath }
+    private static var personasPath: String { VaultPathProvider.personasPath }
     
     /// Get Boss label from folder name
     static func getBossLabel() -> String {

@@ -20,7 +20,7 @@ struct ModelsConfiguration: Codable {
     let providers: [String: ProviderConfiguration]
     
     static let shared: ModelsConfiguration = {
-        let configPath = "/Users/d.patnaik/code/dolce/dolceVault/config/models.json"
+        let configPath = VaultPathProvider.configPath(for: "models.json")
         let url = URL(fileURLWithPath: configPath)
         
         do {
@@ -28,7 +28,7 @@ struct ModelsConfiguration: Codable {
             let configuration = try JSONDecoder().decode(ModelsConfiguration.self, from: data)
             return configuration
         } catch {
-            fatalError("Failed to load models.json from vault: \(error)")
+            fatalError("Failed to load models.json from vault at \(configPath): \(error)")
         }
     }()
 }
