@@ -124,6 +124,9 @@ class FileDropHandler: ObservableObject {
     }
     
     private func loadFromFileURL(_ provider: NSItemProvider) async -> DroppedFile? {
+        // Capture max file size before entering the closure
+        let maxFileSizeLimit = maxFileSize
+        
         return await withCheckedContinuation { continuation in
             _ = provider.loadObject(ofClass: URL.self) { url, error in
                 if let error = error {
@@ -145,9 +148,10 @@ class FileDropHandler: ObservableObject {
                     let size = Int64(data.count)
                     
                     // Check file size
-                    if size > self.maxFileSize {
+                    if size > maxFileSizeLimit {
+                        let maxMB = Double(maxFileSizeLimit) / (1024 * 1024)
                         DispatchQueue.main.async {
-                            self.dropError = "File too large: \(name) (max 10MB)"
+                            self.dropError = "File too large: \(name) (max \(String(format: "%.0f", maxMB))MB)"
                         }
                         continuation.resume(returning: nil)
                         return
@@ -176,6 +180,9 @@ class FileDropHandler: ObservableObject {
     }
     
     private func loadFromType(_ provider: NSItemProvider, type: UTType) async -> DroppedFile? {
+        // Capture max file size before entering the closure
+        let maxFileSizeLimit = maxFileSize
+        
         return await withCheckedContinuation { continuation in
             _ = provider.loadDataRepresentation(forTypeIdentifier: type.identifier) { data, error in
                 if let error = error {
@@ -194,9 +201,10 @@ class FileDropHandler: ObservableObject {
                 let size = Int64(data.count)
                 
                 // Check file size
-                if size > self.maxFileSize {
+                if size > maxFileSizeLimit {
+                    let maxMB = Double(maxFileSizeLimit) / (1024 * 1024)
                     DispatchQueue.main.async {
-                        self.dropError = "File too large (max 10MB)"
+                        self.dropError = "File too large (max \(String(format: "%.0f", maxMB))MB)"
                     }
                     continuation.resume(returning: nil)
                     return

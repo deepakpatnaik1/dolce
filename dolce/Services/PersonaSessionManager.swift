@@ -21,9 +21,7 @@ class PersonaSessionManager: ObservableObject {
     @Published private(set) var currentPersona: String
     
     private init() {
-        // Start with default persona based on the default model
-        let defaultModel = RuntimeModelManager.shared.selectedModel
-        
+        // Start with default persona from configuration
         let defaultPersona = AppConfigurationLoader.defaultPersona
         if PersonaProvider.isValidPersona(defaultPersona) {
             self.currentPersona = defaultPersona
