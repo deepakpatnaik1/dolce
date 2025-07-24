@@ -17,6 +17,7 @@ struct ScrollbackView: View {
     let messages: [ChatMessage]
     private let tokens = DesignTokens.shared
     @ObservedObject private var turnManager = TurnManager.shared
+    @Namespace private var bottomID
     
     // Computed property for display messages (turn-filtered)
     private var displayMessages: [ChatMessage] {
@@ -24,29 +25,43 @@ struct ScrollbackView: View {
     }
     
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(displayMessages.enumerated()), id: \.element.id) { index, message in
-                    let showAuthor = shouldShowAuthor(at: index, in: displayMessages)
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        // Author label with persona colors
-                        if showAuthor {
-                            authorLabel(for: message)
-                        }
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(displayMessages.enumerated()), id: \.element.id) { index, message in
+                        let showAuthor = shouldShowAuthor(at: index, in: displayMessages)
                         
-                        // Message content
-                        messageContent(message)
-                            .padding(.bottom, isLastFromSpeaker(at: index, in: displayMessages) ? 16 : 4)
+                        VStack(alignment: .leading, spacing: 2) {
+                            // Author label with persona colors
+                            if showAuthor {
+                                authorLabel(for: message)
+                            }
+                            
+                            // Message content
+                            messageContent(message)
+                                .padding(.bottom, isLastFromSpeaker(at: index, in: displayMessages) ? 16 : 4)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .id(message.id)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    // Invisible anchor at bottom for scrolling
+                    Color.clear
+                        .frame(height: 1)
+                        .id(bottomID)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+            }
+            .frame(width: tokens.layout.sizing["contentWidth"] ?? 592)
+            .scrollIndicators(.hidden)
+            .onChange(of: messages.count) { _ in
+                // Scroll to bottom when new message arrives
+                withAnimation(.easeOut(duration: 0.3)) {
+                    proxy.scrollTo(bottomID, anchor: .bottom)
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
         }
-        .frame(width: tokens.layout.sizing["contentWidth"] ?? 592)
-        .scrollIndicators(.hidden)
     }
     
     // MARK: - Message Content
