@@ -41,6 +41,15 @@
           "maxTokens": 16000
         }
       ]
+    },
+    "fireworks": {
+      "name": "Fireworks",
+      "apiKeyIdentifier": "FIREWORKS_API_KEY",
+      "baseURL": "https://api.fireworks.ai",
+      "endpoint": "/inference/v1/chat/completions",
+      "authHeader": "Authorization",
+      "authPrefix": "Bearer ",
+      "models": []
     }
   }
 }

@@ -95,21 +95,53 @@ class SuperjournalManager {
             }
         }
         
-        guard let persona = metadata["persona"] else {
+        guard let persona = metadata["persona"],
+              let timestampString = metadata["timestamp"] else {
             return nil
         }
         
+        // Parse timestamp from metadata
+        let timestamp: Date
+        if let parsedDate = ISO8601DateFormatter().date(from: timestampString) {
+            timestamp = parsedDate
+        } else {
+            // Fallback: extract date from filename
+            timestamp = extractDateFromFilename(path) ?? Date()
+        }
+        
+        // Create messages with slightly offset timestamps to maintain order
+        let bossTimestamp = timestamp
+        let personaTimestamp = timestamp.addingTimeInterval(0.001) // 1ms later
+        
         return [
             ChatMessage(
+                id: UUID(),
                 content: bossInput.trimmingCharacters(in: .whitespacesAndNewlines),
                 author: VaultPersonaLoader.getBossLabel(),
+                timestamp: bossTimestamp,
                 persona: nil
             ),
             ChatMessage(
+                id: UUID(),
                 content: personaResponse.trimmingCharacters(in: .whitespacesAndNewlines),
                 author: persona,
+                timestamp: personaTimestamp,
                 persona: persona
             )
         ]
+    }
+    
+    private func extractDateFromFilename(_ path: String) -> Date? {
+        let filename = URL(fileURLWithPath: path).lastPathComponent
+        // Extract date from filename like "FullTurn-2025-07-24-1409.md"
+        guard filename.hasPrefix("FullTurn-") else { return nil }
+        
+        let dateString = filename
+            .replacingOccurrences(of: "FullTurn-", with: "")
+            .replacingOccurrences(of: ".md", with: "")
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd-HHmm"
+        return formatter.date(from: dateString)
     }
 }
