@@ -24,9 +24,9 @@ class ConversationOrchestrator: ObservableObject {
     
     init(
         messageStore: MessageStore,
-        runtimeModelManager: RuntimeModelManager = .shared,
-        personaSessionManager: PersonaSessionManager = .shared,
-        memoryOrchestrator: MemoryOrchestrator = .shared
+        runtimeModelManager: RuntimeModelManager,
+        personaSessionManager: PersonaSessionManager,
+        memoryOrchestrator: MemoryOrchestrator
     ) {
         self.messageStore = messageStore
         self.runtimeModelManager = runtimeModelManager
@@ -117,23 +117,14 @@ class ConversationOrchestrator: ObservableObject {
             // Build request
             let request = try requestBuilder.buildRequest(message: userMessage, config: config)
             
-            // Handle non-streaming response for OpenAI and Anthropic
-            if config.provider == .openai || config.provider == .anthropic {
-                // Execute non-streaming request
-                let (data, _) = try await HTTPExecutor.executeRequest(request)
-                
-                // Parse complete response
-                if let parsedResponse = ResponseParser.parseResponse(data, provider: config.provider) {
-                    messageStore.updateMessage(id: streamingMessageId, content: parsedResponse.content)
-                } else {
-                    messageStore.updateMessage(id: streamingMessageId, content: "Error: Could not parse response")
-                }
+            // Always use non-streaming for all providers
+            let (data, _) = try await HTTPExecutor.executeRequest(request)
+            
+            // Parse complete response
+            if let parsedResponse = ResponseParser.parseResponse(data, provider: config.provider) {
+                messageStore.updateMessage(id: streamingMessageId, content: parsedResponse.content)
             } else {
-                // Execute streaming request for other providers
-                let responseStream = try await HTTPExecutor.executeStreamingRequest(request)
-                
-                // Process response stream
-                await processResponseStream(responseStream, config: config, messageId: streamingMessageId)
+                messageStore.updateMessage(id: streamingMessageId, content: "Error: Could not parse response")
             }
             
         } catch {

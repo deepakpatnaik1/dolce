@@ -67,12 +67,7 @@ struct ConversationRequestBuilder {
     
     /// Determine if provider should use streaming
     private func shouldStream(for provider: APIProvider) -> Bool {
-        switch provider {
-        case .openai, .anthropic:
-            // Non-streaming for better markdown rendering
-            return false
-        @unknown default:
-            return true
-        }
+        // Disable streaming for all providers for stability
+        return false
     }
 }

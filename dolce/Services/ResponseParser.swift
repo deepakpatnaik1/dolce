@@ -110,6 +110,7 @@ struct ResponseParser {
             
             // Extract content from choices (handle null content gracefully)
             if let choices = json["choices"] as? [[String: Any]],
+               !choices.isEmpty,
                let firstChoice = choices.first,
                let delta = firstChoice["delta"] as? [String: Any],
                let content = delta["content"] as? String {

@@ -50,19 +50,26 @@ struct HTTPExecutor {
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    var lineBuffer = ""
+                    var buffer = Data()
+                    let newline = UInt8(10) // ASCII newline character
+                    
                     for try await byte in bytes {
-                        let char = String(UnicodeScalar(byte))
-                        lineBuffer += char
+                        buffer.append(byte)
                         
-                        if char == "\n" {
-                            continuation.yield(lineBuffer.trimmingCharacters(in: .whitespacesAndNewlines))
-                            lineBuffer = ""
+                        if byte == newline {
+                            // Decode the complete line as UTF-8
+                            if let line = String(data: buffer, encoding: .utf8) {
+                                continuation.yield(line.trimmingCharacters(in: .whitespacesAndNewlines))
+                            }
+                            buffer = Data() // Reset buffer for next line
                         }
                     }
                     
-                    if !lineBuffer.isEmpty {
-                        continuation.yield(lineBuffer.trimmingCharacters(in: .whitespacesAndNewlines))
+                    // Handle any remaining data in buffer
+                    if !buffer.isEmpty {
+                        if let line = String(data: buffer, encoding: .utf8) {
+                            continuation.yield(line.trimmingCharacters(in: .whitespacesAndNewlines))
+                        }
                     }
                     
                     continuation.finish()

@@ -24,6 +24,11 @@ struct ScrollbackView: View {
         return TurnFilter.getDisplayMessages(from: messages, turnManager: turnManager)
     }
     
+    // Computed property to trigger scroll on any change
+    private var scrollTrigger: String {
+        "\(displayMessages.count)-\(displayMessages.last?.content ?? "")"
+    }
+    
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -55,10 +60,21 @@ struct ScrollbackView: View {
             }
             .frame(width: tokens.layout.sizing["contentWidth"] ?? 592)
             .scrollIndicators(.hidden)
-            .onChange(of: messages.count) { _ in
-                // Scroll to bottom when new message arrives
-                withAnimation(.easeOut(duration: 0.3)) {
-                    proxy.scrollTo(bottomID, anchor: .bottom)
+            .onChange(of: scrollTrigger) {
+                // Scroll to bottom when messages change
+                // Small delay to ensure layout updates complete
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        proxy.scrollTo(bottomID, anchor: .bottom)
+                    }
+                }
+            }
+            .onAppear {
+                // Scroll to bottom on initial load
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        proxy.scrollTo(bottomID, anchor: .bottom)
+                    }
                 }
             }
         }

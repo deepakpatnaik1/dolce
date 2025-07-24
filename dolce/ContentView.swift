@@ -15,7 +15,12 @@ struct ContentView: View {
     
     init() {
         let messageStore = MessageStore()
-        let conversationOrchestrator = ConversationOrchestrator(messageStore: messageStore)
+        let conversationOrchestrator = ConversationOrchestrator(
+            messageStore: messageStore,
+            runtimeModelManager: .shared,
+            personaSessionManager: .shared,
+            memoryOrchestrator: .shared
+        )
         let fileDropHandler = FileDropHandler()
         
         self._messageStore = StateObject(wrappedValue: messageStore)
