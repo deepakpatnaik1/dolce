@@ -16,7 +16,6 @@ import Foundation
 // MARK: - Configuration Data Models
 
 struct ModelsConfiguration: Codable {
-    let defaultModel: String?
     let providers: [String: ProviderConfiguration]
     
     static let shared: ModelsConfiguration = {

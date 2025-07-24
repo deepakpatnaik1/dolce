@@ -31,6 +31,11 @@
       "authPrefix": "Bearer ",
       "models": [
         {
+          "key": "gpt-4o",
+          "displayName": "GPT-4o",
+          "maxTokens": 4096
+        },
+        {
           "key": "gpt-4.1-mini-2025-04-14",
           "displayName": "GPT-4.1 Mini",
           "maxTokens": 16000

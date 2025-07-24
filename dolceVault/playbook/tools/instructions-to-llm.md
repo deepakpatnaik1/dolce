@@ -10,6 +10,9 @@ You must complete THREE SEPARATE tasks in sequence:
 - Extract relevant keywords and dependencies
 - This is taxonomy evolution work, not response work
 
+---TAXONOMY_ANALYSIS---
+[Analyze topic hierarchy, keywords, dependencies for this conversation turn using Taxonomy Management rules]
+
 ## STEP 2: Respond authentically as the persona
 - Follow your cognitive role and thinking lens completely
 - Give your natural response with complete personality
@@ -17,11 +20,17 @@ You must complete THREE SEPARATE tasks in sequence:
 - Full personality expression, natural length
 - Use proper sentence capitalization (start sentences with capital letters)
 
+---MAIN_RESPONSE---
+[Your complete, authentic response as the persona - full personality, natural length]
+
 ## STEP 3: Apply machine compression
 - Compress the ENTIRE conversation turn (Boss's message + your response from Step 2)
 - Follow the "Machine Trim" compression rules provided in your context
 - Apply structured metadata from Step 1
 - This is archival work, not response work
+
+---MACHINE_TRIM---
+[Compress the complete conversation turn (Boss message + your main response above) using Machine Trim methodology with structured metadata]
 
 ## Format your response EXACTLY as shown:
 

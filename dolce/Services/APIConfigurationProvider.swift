@@ -96,11 +96,12 @@ struct APIConfigurationProvider {
     /// Get default API configuration
     @MainActor
     static func getDefaultConfig() -> APIConfiguration? {
-        // Use the default model from configuration
-        guard let defaultModel = ModelsConfiguration.shared.defaultModel else {
+        // Use the default model from RuntimeModelManager which handles persona mapping
+        let selectedModel = RuntimeModelManager.shared.selectedModel
+        guard !selectedModel.isEmpty else {
             return nil
         }
-        return getConfigForModel(defaultModel)
+        return getConfigForModel(selectedModel)
     }
     
     /// Get default conversation settings
@@ -116,7 +117,9 @@ struct APIConfigurationProvider {
     /// Check if API configuration is valid
     @MainActor
     static func isConfigurationValid() -> Bool {
-        return getDefaultConfig() != nil
+        // Check if we have a valid selected model
+        let selectedModel = RuntimeModelManager.shared.selectedModel
+        return !selectedModel.isEmpty && getConfigForModel(selectedModel) != nil
     }
     
     /// Get human-readable configuration status

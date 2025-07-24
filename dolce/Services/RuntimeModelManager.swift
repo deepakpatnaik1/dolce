@@ -8,9 +8,10 @@ final class RuntimeModelManager: ObservableObject {
     @Published var selectedModel: String
     
     private init() {
-        // Load default model from configuration
-        if let defaultModel = ModelsConfiguration.shared.defaultModel {
-            self.selectedModel = defaultModel
+        // Load default model from persona mapping (single source of truth)
+        if let claudeDefault = PersonaMappingLoader.getDefaultModel(for: .claude) {
+            // Default to Claude model with provider prefix
+            self.selectedModel = "anthropic:\(claudeDefault)"
         } else if let nonClaudeDefault = PersonaMappingLoader.getDefaultModel(for: .nonClaude) {
             // Use the default non-Claude model from persona mapping
             // Need to add provider prefix for OpenAI models

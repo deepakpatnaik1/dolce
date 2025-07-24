@@ -44,8 +44,21 @@ class MemoryOrchestrator {
         )
         
         
+        // Debug: Log the raw response to see what LLM generated
+        print("[MemoryOrchestrator] ===== RAW LLM RESPONSE =====")
+        print(rawResponse)
+        print("[MemoryOrchestrator] ===== END RAW RESPONSE =====")
+        
         // Step 4: Parse triple response
         let tripleResponse = responseParser.parse(rawResponse)
+        
+        // Debug: Log what was parsed
+        print("[MemoryOrchestrator] ===== PARSED SECTIONS =====")
+        print("TAXONOMY_ANALYSIS length: \(tripleResponse.taxonomyAnalysis.count) chars")
+        print("MAIN_RESPONSE preview: \(String(tripleResponse.mainResponse.prefix(200)))")
+        print("MACHINE_TRIM preview: \(String(tripleResponse.machineTrim.prefix(200)))")
+        print("[MemoryOrchestrator] ===== END PARSED =====")
+        
         print("[MemoryOrchestrator] Parsed response - Main response length: \(tripleResponse.mainResponse.count) chars")
         
         // Step 5: Extract metadata from taxonomy analysis
@@ -56,7 +69,7 @@ class MemoryOrchestrator {
             timestamp: Date(),
             persona: persona,
             bossInput: userInput,
-            personaResponse: tripleResponse.mainResponse,
+            personaResponse: tripleResponse.machineTrim,
             topicHierarchy: metadata.topicHierarchy,
             keywords: metadata.keywords,
             dependencies: metadata.dependencies,
