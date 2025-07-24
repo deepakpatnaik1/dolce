@@ -17,10 +17,21 @@ import SwiftUI
 @MainActor
 class ConversationOrchestrator: ObservableObject {
     private let messageStore: MessageStore
-    private let runtimeModelManager = RuntimeModelManager.shared
+    private let runtimeModelManager: RuntimeModelManager
+    private let personaSessionManager: PersonaSessionManager
+    private let memoryOrchestrator: MemoryOrchestrator
+    private let requestBuilder = ConversationRequestBuilder()
     
-    init(messageStore: MessageStore) {
+    init(
+        messageStore: MessageStore,
+        runtimeModelManager: RuntimeModelManager = .shared,
+        personaSessionManager: PersonaSessionManager = .shared,
+        memoryOrchestrator: MemoryOrchestrator = .shared
+    ) {
         self.messageStore = messageStore
+        self.runtimeModelManager = runtimeModelManager
+        self.personaSessionManager = personaSessionManager
+        self.memoryOrchestrator = memoryOrchestrator
     }
     
     // MARK: - Public Interface
@@ -28,22 +39,22 @@ class ConversationOrchestrator: ObservableObject {
     /// Send user message and orchestrate AI response
     func sendMessage(_ content: String, persona: String? = nil) async {
         // Add user message immediately
-        let userMessage = ChatMessage(content: content, author: "User", persona: nil)
+        let userMessage = MessageFactory.createUserMessage(content: content)
         messageStore.addMessage(userMessage)
         
         // Get AI response
-        let activePersona = persona ?? PersonaSessionManager.shared.getCurrentPersona()
+        let activePersona = persona ?? personaSessionManager.getCurrentPersona()
         await getAIResponse(for: content, persona: activePersona)
     }
     
     /// Send user message with attachments and orchestrate AI response
     func sendMessageWithAttachments(_ content: String, attachments: [DroppedFile], persona: String? = nil) async {
         // Add user message with attachments immediately
-        let userMessage = ChatMessage(content: content, author: "User", persona: nil, attachments: attachments)
+        let userMessage = MessageFactory.createUserMessage(content: content, attachments: attachments)
         messageStore.addMessage(userMessage)
         
         // Get AI response (content already includes processed file data)
-        let activePersona = persona ?? PersonaSessionManager.shared.getCurrentPersona()
+        let activePersona = persona ?? personaSessionManager.getCurrentPersona()
         await getAIResponse(for: content, persona: activePersona)
     }
     
@@ -66,15 +77,14 @@ class ConversationOrchestrator: ObservableObject {
             // Check if memory system is enabled
             if AppConfigurationLoader.isMemorySystemEnabled {
                 // Use memory system for processing
-                let response = try await MemoryOrchestrator.shared.processWithMemory(
+                let response = try await memoryOrchestrator.processWithMemory(
                     userInput: userMessage,
                     persona: persona
                 )
                 
                 // Add the response to message store
-                let aiMessage = ChatMessage(
+                let aiMessage = MessageFactory.createAIMessage(
                     content: response,
-                    author: "AI",
                     persona: persona
                 )
                 messageStore.addMessage(aiMessage)
@@ -100,13 +110,12 @@ class ConversationOrchestrator: ObservableObject {
             }
             
             // Start streaming response
-            let streamingMessageId = messageStore.startStreamingMessage(
-                author: "AI", 
-                persona: persona
-            )
+            let streamingMessage = MessageFactory.createStreamingAIMessage(persona: persona)
+            messageStore.addMessage(streamingMessage)
+            let streamingMessageId = streamingMessage.id
             
             // Build request
-            let request = try buildRequest(message: userMessage, config: config)
+            let request = try requestBuilder.buildRequest(message: userMessage, config: config)
             
             // Handle non-streaming response for OpenAI and Anthropic
             if config.provider == .openai || config.provider == .anthropic {
@@ -132,42 +141,6 @@ class ConversationOrchestrator: ObservableObject {
         }
     }
     
-    /// Build API request using configuration
-    private func buildRequest(message: String, config: APIConfiguration) throws -> URLRequest {
-        // Build provider-specific request body
-        let requestBody: [String: Any]
-        switch config.provider {
-        case .openai:
-            requestBody = RequestBodyBuilder.buildOpenAIBody(
-                message: message,
-                model: config.model,
-                maxTokens: config.maxTokens,
-                streaming: false  // Temporarily disabled for debugging
-            )
-        case .anthropic:
-            requestBody = RequestBodyBuilder.buildSingleMessageBody(
-                message: message,
-                model: config.model,
-                maxTokens: config.maxTokens,
-                streaming: false  // Temporarily disabled for better markdown rendering
-            )
-        @unknown default:
-            requestBody = RequestBodyBuilder.buildSingleMessageBody(
-                message: message,
-                model: config.model,
-                maxTokens: config.maxTokens,
-                streaming: true
-            )
-        }
-        
-        return try HTTPRequestBuilder.buildRequest(
-            baseURL: config.baseURL,
-            endpoint: config.endpoint,
-            apiKey: config.apiKey,
-            requestBody: requestBody,
-            headers: config.headers
-        )
-    }
     
     /// Process streaming response using ResponseParser
     private func processResponseStream(
@@ -201,11 +174,7 @@ class ConversationOrchestrator: ObservableObject {
     
     /// Add system error message
     private func addErrorMessage(_ message: String) {
-        let errorMessage = ChatMessage(
-            content: message,
-            author: "System",
-            persona: nil
-        )
+        let errorMessage = MessageFactory.createSystemMessage(content: message)
         messageStore.addMessage(errorMessage)
     }
 }
