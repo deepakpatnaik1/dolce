@@ -13,5 +13,8 @@
   },
   "defaults": {
     "fallbackProvider": "anthropic"
+  },
+  "features": {
+    "memorySystemEnabled": true
   }
 }

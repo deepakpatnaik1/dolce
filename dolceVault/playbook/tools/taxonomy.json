@@ -1,103 +1,14 @@
 {
   "contexts" : [
-    "project-planning",
-    "problem-solving",
-    "knowledge-sharing",
-    "decision-making"
+
   ],
   "dependencies" : [
-    "builds_on",
-    "clarifies",
-    "challenges",
-    "resolves"
+
   ],
   "relationships" : [
-    "boss-persona",
-    "tone-shift",
-    "trust-building",
-    "conflict-resolution"
+
   ],
-  "topics" : {
-    "daily" : {
-      "subcategories" : {
-        "food" : [
-          "vegetables",
-          "cooking",
-          "nutrition",
-          "ingredients"
-        ],
-        "health" : [
-          "exercise",
-          "wellness",
-          "medical"
-        ]
-      }
-    },
-    "personal" : {
-      "subcategories" : {
-        "communication" : [
-          "symbols",
-          "identity",
-          "signature",
-          "greetings"
-        ],
-        "finance" : [
-          "indie-sustainability"
-        ],
-        "insights" : [
-          "independence",
-          "breakthroughs",
-          "realizations"
-        ]
-      }
-    },
-    "philosophy" : {
-      "subcategories" : {
-        "epistemology" : [
-          "knowledge",
-          "belief",
-          "truth"
-        ],
-        "ethics" : [
-          "decision-making",
-          "responsibility",
-          "consequences"
-        ]
-      }
-    },
-    "technology" : {
-      "subcategories" : {
-        "ai" : [
-          "language-models",
-          "training",
-          "inference",
-          "persona-intelligence"
-        ],
-        "development" : [
-          "architecture",
-          "debugging",
-          "testing"
-        ],
-        "javascript" : [
-          "module-systems",
-          "bundling",
-          "compatibility"
-        ],
-        "programming-languages" : [
-          "rust",
-          "swift",
-          "python"
-        ],
-        "startups" : [
-          "incubators",
-          "indie-development"
-        ],
-        "web-development" : [
-          "css-frameworks",
-          "javascript",
-          "react"
-        ]
-      }
-    }
-  }
+  "topics" : [
+
+  ]
 }

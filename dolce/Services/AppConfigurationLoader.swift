@@ -19,6 +19,7 @@ struct AppConfigurationLoader {
         let fileHandling: FileHandling
         let conversation: Conversation
         let defaults: Defaults
+        let features: Features?
         
         struct FileHandling: Codable {
             let maxFileSizeMB: Int
@@ -38,6 +39,10 @@ struct AppConfigurationLoader {
         
         struct Defaults: Codable {
             let fallbackProvider: String
+        }
+        
+        struct Features: Codable {
+            let memorySystemEnabled: Bool?
         }
     }
     
@@ -104,5 +109,10 @@ struct AppConfigurationLoader {
     /// Clear cached configuration
     static func clearCache() {
         cachedConfig = nil
+    }
+    
+    /// Check if memory system is enabled
+    static var isMemorySystemEnabled: Bool {
+        return loadConfig()?.features?.memorySystemEnabled ?? false
     }
 }

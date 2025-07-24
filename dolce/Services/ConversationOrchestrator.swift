@@ -63,6 +63,34 @@ class ConversationOrchestrator: ObservableObject {
     /// Orchestrate AI response generation
     private func getAIResponse(for userMessage: String, persona: String) async {
         do {
+            // Check if memory system is enabled
+            if AppConfigurationLoader.isMemorySystemEnabled {
+                // Use memory system for processing
+                let response = try await MemoryOrchestrator.shared.processWithMemory(
+                    userInput: userMessage,
+                    persona: persona
+                )
+                
+                // Add the response to message store
+                let aiMessage = ChatMessage(
+                    content: response,
+                    author: "AI",
+                    persona: persona
+                )
+                messageStore.addMessage(aiMessage)
+            } else {
+                // Use original non-memory flow
+                await getAIResponseOriginal(for: userMessage, persona: persona)
+            }
+        } catch {
+            print("[ConversationOrchestrator] Memory system error: \(error)")
+            addErrorMessage("Error: \(error.localizedDescription)")
+        }
+    }
+    
+    /// Original AI response generation (without memory)
+    private func getAIResponseOriginal(for userMessage: String, persona: String) async {
+        do {
             // Get configuration for selected model from RuntimeModelManager
             let selectedModelKey = runtimeModelManager.selectedModel
             let config = APIConfigurationProvider.getConfigForModel(selectedModelKey)

@@ -35,6 +35,11 @@ class PersonaSessionManager: ObservableObject {
     /// Update the current persona
     func setCurrentPersona(_ persona: String) {
         currentPersona = persona
+        
+        // Persist to vault if memory system is enabled
+        if AppConfigurationLoader.isMemorySystemEnabled {
+            VaultStateManager.shared.saveCurrentPersona(persona)
+        }
     }
     
     /// Get the current persona

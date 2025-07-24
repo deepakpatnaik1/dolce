@@ -15,6 +15,7 @@ You must complete THREE SEPARATE tasks in sequence:
 - Give your natural response with complete personality
 - This is your authentic voice responding to Boss
 - Full personality expression, natural length
+- Use proper sentence capitalization (start sentences with capital letters)
 
 ## STEP 3: Apply machine compression
 - Compress the ENTIRE conversation turn (Boss's message + your response from Step 2)

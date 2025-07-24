@@ -58,10 +58,24 @@ struct ContentView: View {
         }
         .onAppear {
             // App initialization
+            restorePersistedState()
         }
         .onDrop(of: [.fileURL, .image, .pdf, .plainText], isTargeted: $fileDropHandler.isHovering) { providers in
             fileDropHandler.handleDrop(providers: providers)
         }
+    }
+    
+    /// Restore persisted state on app launch
+    private func restorePersistedState() {
+        guard AppConfigurationLoader.isMemorySystemEnabled else { return }
+        
+        // Restore current persona
+        if let savedPersona = VaultStateManager.shared.loadCurrentPersona() {
+            PersonaSessionManager.shared.setCurrentPersona(savedPersona)
+        }
+        
+        // Note: Messages are already loaded in MessageStore.init()
+        // Additional state restoration can be added here as needed
     }
 }
 
