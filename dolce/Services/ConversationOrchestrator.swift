@@ -83,7 +83,6 @@ class ConversationOrchestrator: ObservableObject {
                 await getAIResponseOriginal(for: userMessage, persona: persona)
             }
         } catch {
-            print("[ConversationOrchestrator] Memory system error: \(error)")
             addErrorMessage("Error: \(error.localizedDescription)")
         }
     }
