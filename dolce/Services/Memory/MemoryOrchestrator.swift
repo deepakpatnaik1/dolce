@@ -21,11 +21,11 @@ class MemoryOrchestrator {
         
         // Step 1: Build omniscient bundle
         let bundle = bundleBuilder.buildBundle(for: persona, userMessage: userInput)
-        let bundleContent = bundle.formatted()
+        let systemPrompt = bundle.systemPrompt()
         
         // Debug: Log bundle structure (first 500 chars)
-        print("[MemoryOrchestrator] Bundle preview: \(String(bundleContent.prefix(500)))...")
-        print("[MemoryOrchestrator] Bundle length: \(bundleContent.count) characters")
+        print("[MemoryOrchestrator] System prompt preview: \(String(systemPrompt.prefix(500)))...")
+        print("[MemoryOrchestrator] System prompt length: \(systemPrompt.count) characters")
         
         // Step 2: Get current model configuration
         let modelConfig = RuntimeModelManager.shared.selectedModel
@@ -39,9 +39,10 @@ class MemoryOrchestrator {
         
         print("[MemoryOrchestrator] Processing with provider: \(provider), model: \(model), persona: \(persona)")
         
-        // Step 3: Send to appropriate LLM service
+        // Step 3: Send to appropriate LLM service with system prompt and user message
         let rawResponse = try await sendToLLM(
-            bundleContent: bundleContent,
+            systemPrompt: systemPrompt,
+            userMessage: userInput,
             provider: provider,
             model: model
         )
@@ -85,20 +86,20 @@ class MemoryOrchestrator {
         return tripleResponse.mainResponse
     }
     
-    private func sendToLLM(bundleContent: String, provider: String, model: String) async throws -> String {
+    private func sendToLLM(systemPrompt: String, userMessage: String, provider: String, model: String) async throws -> String {
         switch provider.lowercased() {
         case "anthropic":
-            return try await sendToAnthropic(content: bundleContent, model: model)
+            return try await sendToAnthropic(systemPrompt: systemPrompt, userMessage: userMessage, model: model)
         case "openai":
-            return try await sendToOpenAI(content: bundleContent, model: model)
+            return try await sendToOpenAI(systemPrompt: systemPrompt, userMessage: userMessage, model: model)
         case "fireworks":
-            return try await sendToFireworks(content: bundleContent, model: model)
+            return try await sendToFireworks(systemPrompt: systemPrompt, userMessage: userMessage, model: model)
         default:
             throw NSError(domain: "MemoryOrchestrator", code: 2, userInfo: [NSLocalizedDescriptionKey: "Unsupported provider: \(provider)"])
         }
     }
     
-    private func sendToAnthropic(content: String, model: String) async throws -> String {
+    private func sendToAnthropic(systemPrompt: String, userMessage: String, model: String) async throws -> String {
         guard let apiKey = APIKeyManager.getAPIKey(for: "ANTHROPIC_API_KEY") else {
             print("[MemoryOrchestrator] Failed to get Anthropic API key")
             throw NSError(domain: "MemoryOrchestrator", code: 4, userInfo: [NSLocalizedDescriptionKey: "No API key for Anthropic"])
@@ -106,10 +107,11 @@ class MemoryOrchestrator {
         print("[MemoryOrchestrator] Sending to Anthropic with model: \(model)")
         
         let requestBody = RequestBodyBuilder.buildSingleMessageBody(
-            message: content,
+            message: userMessage,
             model: model,
             maxTokens: 4096,
-            streaming: false
+            streaming: false,
+            additionalParams: ["system": systemPrompt]
         )
         
         let request = try HTTPRequestBuilder.buildRequest(
@@ -132,15 +134,21 @@ class MemoryOrchestrator {
         }
     }
     
-    private func sendToOpenAI(content: String, model: String) async throws -> String {
+    private func sendToOpenAI(systemPrompt: String, userMessage: String, model: String) async throws -> String {
         guard let apiKey = APIKeyManager.getAPIKey(for: "OPENAI_API_KEY") else {
             print("[MemoryOrchestrator] Failed to get OpenAI API key")
             throw NSError(domain: "MemoryOrchestrator", code: 3, userInfo: [NSLocalizedDescriptionKey: "No API key for OpenAI"])
         }
         print("[MemoryOrchestrator] Sending to OpenAI with model: \(model)")
         
-        let requestBody = RequestBodyBuilder.buildOpenAIBody(
-            message: content,
+        // OpenAI needs system prompt as a separate message
+        let messages: [[String: Any]] = [
+            ["role": "system", "content": systemPrompt],
+            ["role": "user", "content": userMessage]
+        ]
+        
+        let requestBody = RequestBodyBuilder.buildChatCompletionBody(
+            messages: messages,
             model: model,
             maxTokens: 4096,
             streaming: false
@@ -165,15 +173,21 @@ class MemoryOrchestrator {
         }
     }
     
-    private func sendToFireworks(content: String, model: String) async throws -> String {
+    private func sendToFireworks(systemPrompt: String, userMessage: String, model: String) async throws -> String {
         guard let apiKey = APIKeyManager.getAPIKey(for: "FIREWORKS_API_KEY") else {
             print("[MemoryOrchestrator] Failed to get Fireworks API key")
             throw NSError(domain: "MemoryOrchestrator", code: 7, userInfo: [NSLocalizedDescriptionKey: "No API key for Fireworks"])
         }
         print("[MemoryOrchestrator] Sending to Fireworks with model: \(model)")
         
-        let requestBody = RequestBodyBuilder.buildOpenAIBody(
-            message: content,
+        // Fireworks uses OpenAI-compatible format with system messages
+        let messages: [[String: Any]] = [
+            ["role": "system", "content": systemPrompt],
+            ["role": "user", "content": userMessage]
+        ]
+        
+        let requestBody = RequestBodyBuilder.buildChatCompletionBody(
+            messages: messages,
             model: model,
             maxTokens: 4096,
             streaming: false
