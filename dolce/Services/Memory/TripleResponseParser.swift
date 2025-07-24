@@ -1,40 +1,25 @@
 import Foundation
 
-class TripleResponseParser {
-    static let shared = TripleResponseParser()
+/// Atomic parser for LLM triple responses
+/// ATOMIC RESPONSIBILITY: Parse raw LLM responses into structured TripleResponse
+struct TripleResponseParser: ResponseParsing {
     
-    private init() {}
+    /// Shared instance for backward compatibility
+    static let shared = TripleResponseParser()
     
     func parse(_ response: String) -> TripleResponse {
         // First try standard parsing
         if let parsed = TripleResponse.parse(from: response) {
-            print("[TripleResponseParser] Successfully parsed triple response")
             return parsed
         }
-        
-        // Log for debugging
-        print("[TripleResponseParser] Warning: Response doesn't match expected format")
-        print("[TripleResponseParser] Response preview: \(String(response.prefix(200)))...")
         
         // Fallback parsing - try to extract what we can
         let mainResponse = extractMainResponse(from: response)
         let taxonomyAnalysis = extractTaxonomyAnalysis(from: response)
         let machineTrim = extractMachineTrim(from: response)
         
-        // Check what we found
-        if !mainResponse.isEmpty {
-            print("[TripleResponseParser] Found main response section")
-        }
-        if !taxonomyAnalysis.isEmpty {
-            print("[TripleResponseParser] Found taxonomy analysis section")
-        }
-        if !machineTrim.isEmpty {
-            print("[TripleResponseParser] Found machine trim section")
-        }
-        
         // If we found nothing structured, treat entire response as main
         if mainResponse.isEmpty && taxonomyAnalysis.isEmpty && machineTrim.isEmpty {
-            print("[TripleResponseParser] No structured sections found, using entire response as main")
             return TripleResponse(
                 taxonomyAnalysis: "No taxonomy analysis provided",
                 mainResponse: response.trimmingCharacters(in: .whitespacesAndNewlines),

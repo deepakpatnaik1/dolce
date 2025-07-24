@@ -5,7 +5,7 @@ class MemoryOrchestrator {
     static let shared = MemoryOrchestrator()
     
     private let bundleBuilder: OmniscientBundleBuilder
-    private let responseParser: TripleResponseParser
+    private let responseParser: ResponseParsing
     private let journalManager: JournalManaging
     private let superjournalManager: SuperjournalManaging
     private let taxonomyEvolver: TaxonomyEvolver
@@ -23,7 +23,7 @@ class MemoryOrchestrator {
     // Add public init for dependency injection
     init(
         bundleBuilder: OmniscientBundleBuilder = .shared,
-        responseParser: TripleResponseParser = .shared,
+        responseParser: ResponseParsing = TripleResponseParser.shared,
         journalManager: JournalManaging = JournalManager.shared,
         superjournalManager: SuperjournalManaging = SuperjournalManager.shared,
         taxonomyEvolver: TaxonomyEvolver = .shared
@@ -37,17 +37,12 @@ class MemoryOrchestrator {
     
     func processWithMemory(userInput: String, persona: String) async throws -> String {
         // Validate bundle can be assembled
-        let validationIssues = bundleBuilder.validateBundle(for: persona)
-        if !validationIssues.isEmpty {
-            #if DEBUG
-            print("[MemoryOrchestrator] ⚠️ Bundle validation issues: \(validationIssues.joined(separator: ", "))")
-            #endif
-        }
+        _ = bundleBuilder.validateBundle(for: persona)
+        // Silent validation - issues are handled gracefully by bundleBuilder
         
         // Step 1: Build omniscient bundle
         let bundle = bundleBuilder.buildBundle(for: persona, userMessage: userInput)
         let systemPrompt = bundle.systemPrompt()
-        
         
         // Step 2: Get current model configuration
         let modelConfig = RuntimeModelManager.shared.selectedModel
@@ -59,7 +54,6 @@ class MemoryOrchestrator {
         let provider = String(components[0])
         let model = String(components[1])
         
-        
         // Step 3: Send to appropriate LLM service with system prompt and user message
         let llmService = try LLMProviderFactory.createService(for: provider)
         let rawResponse = try await llmService.sendRequest(
@@ -68,26 +62,8 @@ class MemoryOrchestrator {
             model: model
         )
         
-        
-        #if DEBUG
-        // Log the raw response for debugging
-        print("[MemoryOrchestrator] ===== RAW LLM RESPONSE =====")
-        print(rawResponse)
-        print("[MemoryOrchestrator] ===== END RAW RESPONSE =====")
-        #endif
-        
         // Step 4: Parse triple response
         let tripleResponse = responseParser.parse(rawResponse)
-        
-        #if DEBUG
-        // Log parsed sections for debugging
-        print("[MemoryOrchestrator] ===== PARSED SECTIONS =====")
-        print("TAXONOMY_ANALYSIS length: \(tripleResponse.taxonomyAnalysis.count) chars")
-        print("MAIN_RESPONSE preview: \(String(tripleResponse.mainResponse.prefix(200)))")
-        print("MACHINE_TRIM preview: \(String(tripleResponse.machineTrim.prefix(200)))")
-        print("[MemoryOrchestrator] ===== END PARSED =====")
-        print("[MemoryOrchestrator] Parsed response - Main response length: \(tripleResponse.mainResponse.count) chars")
-        #endif
         
         // Step 5: Extract metadata from taxonomy analysis
         let metadata = metadataParser.parse(tripleResponse.taxonomyAnalysis)
