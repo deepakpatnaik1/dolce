@@ -4,14 +4,36 @@ import Foundation
 class MemoryOrchestrator {
     static let shared = MemoryOrchestrator()
     
-    private let bundleBuilder = OmniscientBundleBuilder.shared
-    private let responseParser = TripleResponseParser.shared
-    private let journalManager = JournalManager.shared
-    private let superjournalManager = SuperjournalManager.shared
-    private let taxonomyEvolver = TaxonomyEvolver.shared
+    private let bundleBuilder: OmniscientBundleBuilder
+    private let responseParser: TripleResponseParser
+    private let journalManager: JournalManaging
+    private let superjournalManager: SuperjournalManaging
+    private let taxonomyEvolver: TaxonomyEvolver
     private let metadataParser = MetadataParser()
     
-    private init() {}
+    // Keep private init for shared instance
+    private init() {
+        self.bundleBuilder = OmniscientBundleBuilder.shared
+        self.responseParser = TripleResponseParser.shared
+        self.journalManager = JournalManager.shared
+        self.superjournalManager = SuperjournalManager.shared
+        self.taxonomyEvolver = TaxonomyEvolver.shared
+    }
+    
+    // Add public init for dependency injection
+    init(
+        bundleBuilder: OmniscientBundleBuilder = .shared,
+        responseParser: TripleResponseParser = .shared,
+        journalManager: JournalManaging = JournalManager.shared,
+        superjournalManager: SuperjournalManaging = SuperjournalManager.shared,
+        taxonomyEvolver: TaxonomyEvolver = .shared
+    ) {
+        self.bundleBuilder = bundleBuilder
+        self.responseParser = responseParser
+        self.journalManager = journalManager
+        self.superjournalManager = superjournalManager
+        self.taxonomyEvolver = taxonomyEvolver
+    }
     
     func processWithMemory(userInput: String, persona: String) async throws -> String {
         // Validate bundle can be assembled

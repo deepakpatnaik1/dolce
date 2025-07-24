@@ -1,11 +1,17 @@
 import Foundation
 
-class VaultReader {
+class VaultReader: VaultReading {
     static let shared = VaultReader()
     private let vaultPath: String
     
+    // Keep private init for shared instance
     private init() {
         self.vaultPath = VaultPathProvider.vaultPath
+    }
+    
+    // Add public init for dependency injection
+    init(vaultPath: String) {
+        self.vaultPath = vaultPath
     }
     
     func readFile(at relativePath: String) -> String? {
@@ -53,5 +59,27 @@ class VaultReader {
             print("Failed to decode JSON at \(relativePath): \(error)")
             return nil
         }
+    }
+    
+    // MARK: - VaultReading Protocol Implementation
+    
+    func fileExists(at path: String) -> Bool {
+        let fullPath = vaultPath + "/" + path
+        return FileManager.default.fileExists(atPath: fullPath)
+    }
+    
+    func listFiles(at path: String) -> [String] {
+        let directoryPath = vaultPath + "/" + path
+        let fileManager = FileManager.default
+        
+        guard let urls = try? fileManager.contentsOfDirectory(
+            at: URL(fileURLWithPath: directoryPath),
+            includingPropertiesForKeys: nil,
+            options: [.skipsHiddenFiles]
+        ) else {
+            return []
+        }
+        
+        return urls.map { $0.lastPathComponent }
     }
 }

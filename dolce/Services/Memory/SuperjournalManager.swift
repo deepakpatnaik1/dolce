@@ -1,10 +1,19 @@
 import Foundation
 
-class SuperjournalManager {
+class SuperjournalManager: SuperjournalManaging {
     static let shared = SuperjournalManager()
     private let superjournalPath = "superjournal"
+    private let vaultWriter: VaultWriting
     
-    private init() {}
+    // Keep private init for shared instance
+    private init() {
+        self.vaultWriter = VaultWriter.shared
+    }
+    
+    // Add public init for dependency injection
+    init(vaultWriter: VaultWriting = VaultWriter.shared) {
+        self.vaultWriter = vaultWriter
+    }
     
     func saveFullTurn(boss: String, persona: String, response: String) {
         let formatter = DateFormatter()
@@ -23,7 +32,7 @@ class SuperjournalManager {
         \(persona): \(response)
         """
         
-        VaultWriter.shared.writeFile(content: content, to: "\(superjournalPath)/\(filename)")
+        vaultWriter.writeFile(content: content, to: "\(superjournalPath)/\(filename)")
     }
     
     func loadAllTurns() -> [ChatMessage] {

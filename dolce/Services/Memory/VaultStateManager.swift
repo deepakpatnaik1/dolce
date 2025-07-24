@@ -4,26 +4,39 @@ class VaultStateManager {
     static let shared = VaultStateManager()
     private let stateFile = "playbook/tools/currentPersona.md"
     private let scrollStateFile = ".app-state/scrollPosition.json"
+    private let vaultReader: VaultReading
+    private let vaultWriter: VaultWriting
     
-    private init() {}
+    // Keep private init for shared instance
+    private init() {
+        self.vaultReader = VaultReader.shared
+        self.vaultWriter = VaultWriter.shared
+    }
+    
+    // Add public init for dependency injection
+    init(vaultReader: VaultReading = VaultReader.shared,
+         vaultWriter: VaultWriting = VaultWriter.shared) {
+        self.vaultReader = vaultReader
+        self.vaultWriter = vaultWriter
+    }
     
     func saveCurrentPersona(_ persona: String) {
         let content = persona.lowercased()
-        VaultWriter.shared.writeFile(content: content, to: stateFile)
+        vaultWriter.writeFile(content: content, to: stateFile)
     }
     
     func loadCurrentPersona() -> String? {
-        return VaultReader.shared.readFile(at: stateFile)?
+        return vaultReader.readFile(at: stateFile)?
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     func saveScrollPosition(_ position: CGFloat) {
         let state = ["scrollPosition": position]
-        VaultWriter.shared.writeJSON(state, to: scrollStateFile)
+        vaultWriter.writeJSON(state, to: scrollStateFile)
     }
     
     func loadScrollPosition() -> CGFloat? {
-        let state = VaultReader.shared.readJSON(at: scrollStateFile, as: [String: CGFloat].self)
+        let state = vaultReader.readJSON(at: scrollStateFile, as: [String: CGFloat].self)
         return state?["scrollPosition"]
     }
 }

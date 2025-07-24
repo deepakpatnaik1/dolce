@@ -2,8 +2,21 @@ import Foundation
 
 class OmniscientBundleBuilder {
     static let shared = OmniscientBundleBuilder()
+    private let vaultReader: VaultReading
+    private let journalManager: JournalManager
     
-    private init() {}
+    // Keep private init for shared instance
+    private init() {
+        self.vaultReader = VaultReader.shared
+        self.journalManager = JournalManager.shared
+    }
+    
+    // Add public init for dependency injection
+    init(vaultReader: VaultReading = VaultReader.shared,
+         journalManager: JournalManager = JournalManager.shared) {
+        self.vaultReader = vaultReader
+        self.journalManager = journalManager
+    }
     
     func buildBundle(for persona: String, userMessage: String) -> OmniscientBundle {
         let instructions = loadInstructions()
@@ -25,7 +38,7 @@ class OmniscientBundleBuilder {
     }
     
     private func loadInstructions() -> String {
-        return VaultReader.shared.readFile(at: "playbook/tools/instructions-to-llm.md") ?? ""
+        return vaultReader.readFile(at: "playbook/tools/instructions-to-llm.md") ?? ""
     }
     
     private func loadBossContext() -> String {
@@ -43,7 +56,7 @@ class OmniscientBundleBuilder {
     }
     
     private func loadJournalContext() -> String {
-        let recentTrims = JournalManager.shared.loadRecentTrims(limit: 20)
+        let recentTrims = journalManager.loadRecentTrims(limit: 20)
         
         if recentTrims.isEmpty {
             return "No previous conversations in journal."
@@ -55,7 +68,7 @@ class OmniscientBundleBuilder {
     }
     
     private func loadTaxonomy() -> String {
-        guard let taxonomy = VaultReader.shared.readFile(at: "playbook/tools/taxonomy.json") else {
+        guard let taxonomy = vaultReader.readFile(at: "playbook/tools/taxonomy.json") else {
             return "{}"
         }
         return taxonomy

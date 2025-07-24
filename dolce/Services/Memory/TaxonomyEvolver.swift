@@ -3,8 +3,21 @@ import Foundation
 class TaxonomyEvolver {
     static let shared = TaxonomyEvolver()
     private let taxonomyPath = "playbook/tools/taxonomy.json"
+    private let vaultReader: VaultReading
+    private let vaultWriter: VaultWriting
     
-    private init() {}
+    // Keep private init for shared instance
+    private init() {
+        self.vaultReader = VaultReader.shared
+        self.vaultWriter = VaultWriter.shared
+    }
+    
+    // Add public init for dependency injection
+    init(vaultReader: VaultReading = VaultReader.shared,
+         vaultWriter: VaultWriting = VaultWriter.shared) {
+        self.vaultReader = vaultReader
+        self.vaultWriter = vaultWriter
+    }
     
     func evolve(with analysis: String) {
         guard var taxonomy = loadCurrentTaxonomy() else {
@@ -35,11 +48,11 @@ class TaxonomyEvolver {
     }
     
     func loadCurrentTaxonomy() -> Taxonomy? {
-        return VaultReader.shared.readJSON(at: taxonomyPath, as: Taxonomy.self)
+        return vaultReader.readJSON(at: taxonomyPath, as: Taxonomy.self)
     }
     
     func saveTaxonomy(_ taxonomy: Taxonomy) {
-        VaultWriter.shared.writeJSON(taxonomy, to: taxonomyPath)
+        vaultWriter.writeJSON(taxonomy, to: taxonomyPath)
     }
     
     private func extractValue(from line: String, prefix: String) -> String? {

@@ -1,17 +1,30 @@
 import Foundation
 
-class JournalManager {
+class JournalManager: JournalManaging {
     static let shared = JournalManager()
     private let journalPath = "journal"
+    private let vaultWriter: VaultWriting
+    private let vaultReader: VaultReading
     
-    private init() {}
+    // Keep private init for shared instance
+    private init() {
+        self.vaultWriter = VaultWriter.shared
+        self.vaultReader = VaultReader.shared
+    }
+    
+    // Add public init for dependency injection
+    init(vaultWriter: VaultWriting = VaultWriter.shared,
+         vaultReader: VaultReading = VaultReader.shared) {
+        self.vaultWriter = vaultWriter
+        self.vaultReader = vaultReader
+    }
     
     func saveTrim(_ trim: MachineTrim) {
         let content = trim.toMarkdown()
         let filename = trim.filename()
         let path = "\(journalPath)/\(filename)"
         
-        VaultWriter.shared.writeFile(content: content, to: path)
+        vaultWriter.writeFile(content: content, to: path)
     }
     
     func loadRecentTrims(limit: Int = 10) -> [MachineTrim] {

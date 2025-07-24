@@ -1,12 +1,18 @@
 import Foundation
 
-class VaultWriter {
+class VaultWriter: VaultWriting {
     static let shared = VaultWriter()
     private let vaultPath: String
     private let fileManager = FileManager.default
     
+    // Keep private init for shared instance
     private init() {
         self.vaultPath = VaultPathProvider.vaultPath
+    }
+    
+    // Add public init for dependency injection
+    init(vaultPath: String) {
+        self.vaultPath = vaultPath
     }
     
     func writeFile(content: String, to relativePath: String) {
@@ -36,7 +42,7 @@ class VaultWriter {
         }
     }
     
-    func ensureDirectoryExists(at path: String) {
+    private func ensureDirectoryExists(at path: String) {
         if !fileManager.fileExists(atPath: path) {
             do {
                 try fileManager.createDirectory(
@@ -47,6 +53,22 @@ class VaultWriter {
             } catch {
                 print("Failed to create directory at \(path): \(error)")
             }
+        }
+    }
+    
+    // MARK: - VaultWriting Protocol Implementation
+    
+    func createDirectory(at relativePath: String) {
+        let fullPath = vaultPath + "/" + relativePath
+        ensureDirectoryExists(at: fullPath)
+    }
+    
+    func deleteFile(at relativePath: String) {
+        let fullPath = vaultPath + "/" + relativePath
+        do {
+            try fileManager.removeItem(atPath: fullPath)
+        } catch {
+            print("Failed to delete file at \(fullPath): \(error)")
         }
     }
 }
