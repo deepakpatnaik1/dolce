@@ -2,7 +2,7 @@ import Foundation
 
 class TaxonomyEvolver {
     static let shared = TaxonomyEvolver()
-    private let taxonomyPath = "playbook/tools/taxonomy.json"
+    private let taxonomyPath = PathConfiguration.taxonomyPath
     private let vaultReader: VaultReading
     private let vaultWriter: VaultWriting
     

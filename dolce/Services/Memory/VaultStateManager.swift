@@ -2,8 +2,7 @@ import Foundation
 
 class VaultStateManager {
     static let shared = VaultStateManager()
-    private let stateFile = "playbook/tools/currentPersona.md"
-    private let scrollStateFile = ".app-state/scrollPosition.json"
+    private let stateFile = PathConfiguration.currentPersonaPath
     private let vaultReader: VaultReading
     private let vaultWriter: VaultWriting
     
@@ -30,13 +29,4 @@ class VaultStateManager {
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
-    func saveScrollPosition(_ position: CGFloat) {
-        let state = ["scrollPosition": position]
-        vaultWriter.writeJSON(state, to: scrollStateFile)
-    }
-    
-    func loadScrollPosition() -> CGFloat? {
-        let state = vaultReader.readJSON(at: scrollStateFile, as: [String: CGFloat].self)
-        return state?["scrollPosition"]
-    }
 }

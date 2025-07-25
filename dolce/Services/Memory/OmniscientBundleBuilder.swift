@@ -38,21 +38,21 @@ class OmniscientBundleBuilder {
     }
     
     private func loadInstructions() -> String {
-        return vaultReader.readFile(at: "playbook/tools/instructions-to-llm.md") ?? ""
+        return vaultReader.readFile(at: PathConfiguration.instructionsPath) ?? ""
     }
     
     private func loadBossContext() -> String {
-        return loadAllMarkdownFiles(from: "playbook/boss", sectionName: "BOSS")
+        return loadAllMarkdownFiles(from: PathConfiguration.bossPath, sectionName: "BOSS")
     }
     
     private func loadPersonaContext(for persona: String) -> String {
         // Use capitalized persona name for directory
-        let personaName = persona.prefix(1).uppercased() + persona.dropFirst()
-        return loadAllMarkdownFiles(from: "playbook/personas/\(personaName)", sectionName: "PERSONA")
+        let personaFolderPath = PathConfiguration.personaFolderPath(for: persona)
+        return loadAllMarkdownFiles(from: personaFolderPath, sectionName: "PERSONA")
     }
     
     private func loadToolsContext() -> String {
-        return loadAllMarkdownFiles(from: "playbook/tools", sectionName: "TOOLS")
+        return loadAllMarkdownFiles(from: PathConfiguration.toolsPath, sectionName: "TOOLS")
     }
     
     private func loadJournalContext() -> String {
@@ -68,7 +68,7 @@ class OmniscientBundleBuilder {
     }
     
     private func loadTaxonomy() -> String {
-        guard let taxonomy = vaultReader.readFile(at: "playbook/tools/taxonomy.json") else {
+        guard let taxonomy = vaultReader.readFile(at: PathConfiguration.taxonomyPath) else {
             return "{}"
         }
         return taxonomy
@@ -124,22 +124,22 @@ class OmniscientBundleBuilder {
         var issues: [String] = []
         
         // Check instructions
-        let instructionsPath = VaultPathProvider.vaultPath + "/playbook/tools/instructions-to-llm.md"
+        let instructionsPath = VaultPathProvider.vaultPath + "/" + PathConfiguration.instructionsPath
         if !FileManager.default.fileExists(atPath: instructionsPath) {
-            issues.append("Missing instructions-to-llm.md")
+            issues.append("Missing \(PathConfiguration.instructionsFile)")
         }
         
         // Check persona exists
-        let personaName = persona.prefix(1).uppercased() + persona.dropFirst()
-        let personaPath = VaultPathProvider.vaultPath + "/playbook/personas/\(personaName)"
-        if !FileManager.default.fileExists(atPath: personaPath) {
+        let personaFolderPath = VaultPathProvider.vaultPath + "/" + PathConfiguration.personaFolderPath(for: persona)
+        if !FileManager.default.fileExists(atPath: personaFolderPath) {
             issues.append("Persona folder not found: \(persona)")
         }
         
         // Check persona has content
-        let personaFile = "\(personaPath)/\(personaName).md"
-        if !FileManager.default.fileExists(atPath: personaFile) {
-            issues.append("Persona file not found: \(personaName).md")
+        let personaFilePath = VaultPathProvider.vaultPath + "/" + PathConfiguration.personaFilePath(for: persona)
+        if !FileManager.default.fileExists(atPath: personaFilePath) {
+            let personaName = persona.prefix(1).uppercased() + persona.dropFirst()
+            issues.append("Persona file not found: \(personaName)\(PathConfiguration.markdownExtension)")
         }
         
         return issues

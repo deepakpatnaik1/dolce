@@ -18,14 +18,14 @@ import Combine
 @MainActor
 class MessageStore: ObservableObject {
     @Published var messages: [ChatMessage] = []
-    private let superjournalManager: SuperjournalManaging
+    private let persistenceService: MessagePersistenceService
     
-    init(superjournalManager: SuperjournalManaging = SuperjournalManager.shared) {
-        self.superjournalManager = superjournalManager
+    init(persistenceService: MessagePersistenceService = MessagePersistenceService()) {
+        self.persistenceService = persistenceService
         
         // Load persisted messages if memory system is enabled
         if AppConfigurationLoader.isMemorySystemEnabled {
-            loadPersistedMessages()
+            messages = persistenceService.loadPersistedMessages()
         }
     }
     
@@ -68,13 +68,6 @@ class MessageStore: ObservableObject {
     /// Clear all messages
     func clearMessages() {
         messages.removeAll()
-    }
-    
-    // MARK: - Persistence
-    
-    /// Load messages from superjournal
-    private func loadPersistedMessages() {
-        messages = superjournalManager.loadAllTurns()
     }
     
 }
