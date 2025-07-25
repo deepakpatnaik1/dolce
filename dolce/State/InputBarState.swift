@@ -20,9 +20,6 @@ class InputBarState: ObservableObject {
     @Published var textHeight: CGFloat
     @Published var isFocused: Bool = false
     
-    // Temporary bypass flag for debugging
-    static let bypassAtomicLEGO = false // Set to true to disable our new components
-    
     private let tokens = DesignTokens.shared
     private var debouncedCalculator: DebouncedHeightCalculator?
     private var animationCoordinator: AnimationCoordinator?
@@ -44,7 +41,6 @@ class InputBarState: ObservableObject {
             font: font,
             availableWidth: availableWidth
         )
-        print("🏁 InputBarState init: Calculated height for empty text = \(calculatedHeight)")
         self.textHeight = calculatedHeight
     }
     
@@ -68,8 +64,8 @@ class InputBarState: ObservableObject {
         let contentWidth: CGFloat = tokens.layout.sizing["contentWidth"] ?? 592
         let availableWidth = contentWidth - (tokens.elements.inputBar.textPadding * 2)
         
-        // Use debounced calculator if configured and not bypassed, otherwise fall back to direct calculation
-        if let calculator = debouncedCalculator, !Self.bypassAtomicLEGO {
+        // Use debounced calculator if configured, otherwise fall back to direct calculation
+        if let calculator = debouncedCalculator {
             calculator.calculateHeight(
                 for: newText,
                 font: font,

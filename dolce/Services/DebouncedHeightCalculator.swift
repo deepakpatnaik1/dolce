@@ -33,9 +33,6 @@ class DebouncedHeightCalculator: ObservableObject {
         completion: @escaping (CGFloat) -> Void
     ) {
         // Cancel any pending calculation
-        if debounceTask != nil {
-            print("🔴 Debounce: Cancelled pending calculation")
-        }
         debounceTask?.cancel()
         
         // Create new request
@@ -45,8 +42,6 @@ class DebouncedHeightCalculator: ObservableObject {
             availableWidth: availableWidth
         )
         pendingRequest = request
-        
-        print("🔵 Debounce: Starting timer for text length: \(text.count)")
         
         // Schedule debounced calculation using Task
         debounceTask = Task { [weak self] in
@@ -63,12 +58,7 @@ class DebouncedHeightCalculator: ObservableObject {
             
             // Check if this is still the current request
             guard let currentRequest = self.pendingRequest,
-                  currentRequest.id == request.id else { 
-                print("🟡 Debounce: Request no longer current, skipping")
-                return 
-            }
-            
-            print("🟢 Debounce: Executing calculation after delay for text length: \(currentRequest.text.count)")
+                  currentRequest.id == request.id else { return }
             
             // Perform actual calculation
             let height = TextMeasurementEngine.calculateHeight(

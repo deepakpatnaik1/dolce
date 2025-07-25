@@ -26,12 +26,7 @@ class AnimationCoordinator: ObservableObject {
         animation: Animation,
         onChange: @escaping (T) -> Void
     ) where T: Equatable {
-        print("🎬 Animation: Starting animation \(animationId)")
-        
         // Cancel all active animations
-        if !activeAnimations.isEmpty {
-            print("❌ Animation: Cancelling \(activeAnimations.count) active animations")
-        }
         cancelAllAnimations()
         
         // Mark this animation as active
@@ -44,7 +39,6 @@ class AnimationCoordinator: ObservableObject {
         
         // Schedule cleanup after animation duration
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            print("✅ Animation: Completed animation \(animationId)")
             self?.completeAnimation(animationId)
         }
     }
