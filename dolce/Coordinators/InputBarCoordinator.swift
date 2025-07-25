@@ -22,6 +22,10 @@ class InputBarCoordinator: ObservableObject {
     private let messageStore: MessageStore
     private let runtimeModelManager = RuntimeModelManager.shared
     
+    // New services for height calculation fix
+    let debouncedHeightCalculator = DebouncedHeightCalculator()
+    let animationCoordinator = AnimationCoordinator()
+    
     init(conversationOrchestrator: ConversationOrchestrator, 
          fileDropHandler: FileDropHandler,
          messageStore: MessageStore) {

@@ -35,6 +35,11 @@ struct InputBarView: View {
         .fixedSize(horizontal: false, vertical: true)
         .onAppear {
             isInputFocused = true
+            // Configure state with coordinator services
+            state.configure(
+                debouncedCalculator: coordinator.debouncedHeightCalculator,
+                animationCoordinator: coordinator.animationCoordinator
+            )
         }
         .onChange(of: state.text) { _, newValue in
             state.updateHeight(for: newValue)

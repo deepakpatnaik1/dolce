@@ -20,20 +20,38 @@ class InputBarState: ObservableObject {
     @Published var textHeight: CGFloat
     @Published var isFocused: Bool = false
     
+    // Temporary bypass flag for debugging
+    static let bypassAtomicLEGO = false // Set to true to disable our new components
+    
     private let tokens = DesignTokens.shared
+    private var debouncedCalculator: DebouncedHeightCalculator?
+    private var animationCoordinator: AnimationCoordinator?
+    private let currentAnimationId = UUID()
     
     init() {
-        // Calculate initial height consistently with updateHeight method
-        let font = NSFont(name: tokens.typography.bodyFont, size: CGFloat(tokens.elements.inputBar.fontSize)) ?? NSFont.systemFont(ofSize: CGFloat(tokens.elements.inputBar.fontSize))
+        // Calculate actual height for empty text - no hardcoded values
+        let font = NSFont(
+            name: tokens.typography.bodyFont,
+            size: CGFloat(tokens.elements.inputBar.fontSize)
+        ) ?? NSFont.systemFont(ofSize: CGFloat(tokens.elements.inputBar.fontSize))
+        
         let contentWidth: CGFloat = tokens.layout.sizing["contentWidth"] ?? 592
         let availableWidth = contentWidth - (tokens.elements.inputBar.textPadding * 2)
         
-        // Use same calculation as updateHeight for consistency
-        self.textHeight = TextMeasurementEngine.calculateHeight(
+        // Calculate real height for empty string
+        let calculatedHeight = TextMeasurementEngine.calculateHeight(
             for: "",
             font: font,
             availableWidth: availableWidth
         )
+        print("🏁 InputBarState init: Calculated height for empty text = \(calculatedHeight)")
+        self.textHeight = calculatedHeight
+    }
+    
+    /// Configure with coordinator services
+    func configure(debouncedCalculator: DebouncedHeightCalculator, animationCoordinator: AnimationCoordinator) {
+        self.debouncedCalculator = debouncedCalculator
+        self.animationCoordinator = animationCoordinator
     }
     
     // MARK: - State Management
@@ -50,17 +68,48 @@ class InputBarState: ObservableObject {
         let contentWidth: CGFloat = tokens.layout.sizing["contentWidth"] ?? 592
         let availableWidth = contentWidth - (tokens.elements.inputBar.textPadding * 2)
         
-        let newHeight = TextMeasurementEngine.calculateHeight(
-            for: newText,
-            font: font,
-            availableWidth: availableWidth
-        )
-        
-        HeightAnimationEngine.animateHeightChange(
-            from: textHeight,
-            to: newHeight
-        ) { [weak self] height in
-            self?.textHeight = height
+        // Use debounced calculator if configured and not bypassed, otherwise fall back to direct calculation
+        if let calculator = debouncedCalculator, !Self.bypassAtomicLEGO {
+            calculator.calculateHeight(
+                for: newText,
+                font: font,
+                availableWidth: availableWidth
+            ) { [weak self] newHeight in
+                guard let self = self else { return }
+                
+                // Use animation coordinator if available
+                if let coordinator = self.animationCoordinator {
+                    HeightAnimationEngine.animateHeightChange(
+                        from: self.textHeight,
+                        to: newHeight,
+                        animationId: self.currentAnimationId,
+                        coordinator: coordinator
+                    ) { height in
+                        self.textHeight = height
+                    }
+                } else {
+                    HeightAnimationEngine.animateHeightChange(
+                        from: self.textHeight,
+                        to: newHeight
+                    ) { height in
+                        self.textHeight = height
+                    }
+                }
+            }
+        } else {
+            // Fallback to direct calculation (maintains backward compatibility)
+            let newHeight = TextMeasurementEngine.calculateHeight(
+                for: newText,
+                font: font,
+                availableWidth: availableWidth
+            )
+            
+            HeightAnimationEngine.animateHeightChange(
+                from: textHeight,
+                to: newHeight
+            ) { [weak self] height in
+                self?.textHeight = height
+            }
         }
     }
     

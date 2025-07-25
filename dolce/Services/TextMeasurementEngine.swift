@@ -47,6 +47,15 @@ struct TextMeasurementEngine {
         font: NSFont,
         availableWidth: CGFloat
     ) -> CGFloat {
+        // Safety check for extremely large text
+        if text.count > 100000 {
+            print("⚠️ TextMeasurementEngine: Text too large (\(text.count) chars), using estimated height")
+            let lineHeight = calculateLineHeight(for: font)
+            // Estimate based on character count and average line length
+            let estimatedLines = text.count / 50 // Assume ~50 chars per line
+            return CGFloat(estimatedLines) * lineHeight
+        }
+        
         // Step 1: Calculate actual line count needed
         let actualLineCount = calculateLineCount(for: text, font: font, availableWidth: availableWidth)
         
