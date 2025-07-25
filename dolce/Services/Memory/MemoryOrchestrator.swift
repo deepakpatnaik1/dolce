@@ -121,8 +121,6 @@ class MemoryOrchestrator {
         // Step 4: Process streaming response
         let responseStream = try await HTTPExecutor.executeStreamingRequest(request)
         var accumulatedContent = ""
-        var isShowingMainResponse = false
-        var mainResponseStart = 0
         
         for try await line in responseStream {
             let chunk = ResponseParser.parseStreamingLine(line, provider: config.provider)
@@ -133,9 +131,6 @@ class MemoryOrchestrator {
                 
                 // Extract and show only MAIN_RESPONSE section
                 if let mainRange = accumulatedContent.range(of: "---MAIN_RESPONSE---") {
-                    isShowingMainResponse = true
-                    mainResponseStart = accumulatedContent.distance(from: accumulatedContent.startIndex, to: mainRange.upperBound)
-                    
                     // Find the end of main response (or use end of accumulated content)
                     let afterMain = String(accumulatedContent[mainRange.upperBound...])
                     if let trimRange = afterMain.range(of: "---MACHINE_TRIM---") {
