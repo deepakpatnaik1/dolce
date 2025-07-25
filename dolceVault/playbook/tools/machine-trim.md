@@ -113,8 +113,8 @@ context_deltas:
 
 ---
 
-### 10. FORMAT MUST BE MARKDOWN
-- Save file as: DolceVault/journal/Trim-YYYY-MM-DD-HHMM.md
+### 10. FILE FORMAT
+- Save as .md file: DolceVault/journal/Trim-YYYY-MM-DD-HHMM.md
 - Timestamp must be UTC
 
 ---
@@ -122,46 +122,36 @@ context_deltas:
 ### Enhanced Format Examples
 
 **Example 1: Simple factual exchange (no sentiment)**
-```markdown
 topic_hierarchy: daily/food/vegetables
 keywords: [turnip, root-vegetable, culinary, nutrition, cooking]
 Boss: how turnip?
 Samara: turnip: root vegetable, round bulbous, white/pale yellow flesh, purple/green/white skin, slightly sweet peppery flavor, crisp raw texture, tender mild cooked, rich fiber vitamin C minerals, used stews soups roasted, grows best cool climates, staple food many cultures centuries
-```
 
 **Example 2: Technical consultation (no sentiment)**
-```markdown
 topic_hierarchy: technology/web-development/css-frameworks
 keywords: [CSS-in-JS, styled-components, emotion, React, performance, TypeScript]
 Boss: which CSS-in-JS library use?
 Samara: CSS-in-JS options: styled-components popular React, emotion performant flexible, JSS framework-agnostic, styled-system design systems, stitches near-zero runtime; recommend emotion balance performance developer experience, good TypeScript support, active maintenance
-```
 
 **Example 3: Personal symbol explanation (no sentiment)**
-```markdown
 topic_hierarchy: personal/communication/symbols
 keywords: [rose, compass, starlight, personal-symbols, signature, identity]
 Boss: what mean "rose, compass starlight"?
 Samara: rose compass starlight: personal symbols tag responses identify me, rose means clarity growth, compass means guidance direction, starlight means insight illumination; anchor voice uniquely conversations, signature woven messages
-```
 
 **Example 4: Technical frustration (with sentiment)**
-```markdown
 topic_hierarchy: technology/javascript/module-systems
 keywords: [ESM, CommonJS, import, require, module-bundling, compatibility]
 sentiment: frustrated
 Boss: Vanessa, ESM/CommonJS nightmare driving insane! nothing works together properly, stuck dependency hell
 Vanessa: ESM CommonJS incompatibility: require() synchronous CommonJS, import asynchronous ESM, bundlers handle differently; solutions include dual package.json exports, conditional imports, babel transforms; recommend gradual migration ESM-first approach, use tools like tsup dual builds, test thoroughly mixed environments
-```
 
 **Example 5: Breakthrough excitement (with sentiment)**
-```markdown
 topic_hierarchy: personal/insights/independence
 keywords: [Dolce, AI-independence, ChatGPT, Grok, epiphany, self-reliance]
 sentiment: excited
 Boss: Gunnar, incredible realization - Dolce means never depend ChatGPT, Grok, external AI services again! true AI independence!
 Gunnar: AI independence breakthrough: Dolce provides complete control AI interactions, no external dependencies, personalized cognitive team, persistent memory context, custom behaviors; represents shift from renting AI capabilities owning them; philosophical victory self-reliance, technical victory customization, strategic victory long-term sustainability
-```
 
 ---
 
