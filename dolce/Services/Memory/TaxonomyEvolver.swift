@@ -21,7 +21,7 @@ class TaxonomyEvolver {
     
     func evolve(with analysis: String) {
         guard var taxonomy = loadCurrentTaxonomy() else {
-            print("Failed to load current taxonomy")
+            // Failed to load current taxonomy - will create new one
             return
         }
         

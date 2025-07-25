@@ -54,7 +54,7 @@ struct InputBarView: View {
     private var textInputSection: some View {
         ZStack(alignment: .bottomLeading) {
             TextField("", text: $state.text, axis: .vertical)
-                .font(.custom(tokens.typography.bodyFont, size: 12))
+                .font(.custom(tokens.typography.bodyFont, size: CGFloat(tokens.elements.inputBar.fontSize)))
                 .foregroundColor(.white)
                 .focused($isInputFocused)
                 .textFieldStyle(PlainTextFieldStyle())

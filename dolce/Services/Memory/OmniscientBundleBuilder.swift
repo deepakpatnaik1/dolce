@@ -110,7 +110,7 @@ class OmniscientBundleBuilder {
                 allContent.append(content)
                 allContent.append("") // Empty line separator
             } catch {
-                print("⚠️ Could not read file \(fileName): \(error)")
+                // Could not read file - continue with other files
             }
         }
         

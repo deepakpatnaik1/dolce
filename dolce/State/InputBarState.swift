@@ -23,9 +23,17 @@ class InputBarState: ObservableObject {
     private let tokens = DesignTokens.shared
     
     init() {
-        // Calculate initial single-line height
-        let font = NSFont(name: DesignTokens.shared.typography.bodyFont, size: 12) ?? NSFont.systemFont(ofSize: 12)
-        self.textHeight = TextMeasurementEngine.calculateLineHeight(for: font)
+        // Calculate initial height consistently with updateHeight method
+        let font = NSFont(name: tokens.typography.bodyFont, size: CGFloat(tokens.elements.inputBar.fontSize)) ?? NSFont.systemFont(ofSize: CGFloat(tokens.elements.inputBar.fontSize))
+        let contentWidth: CGFloat = tokens.layout.sizing["contentWidth"] ?? 592
+        let availableWidth = contentWidth - (tokens.elements.inputBar.textPadding * 2)
+        
+        // Use same calculation as updateHeight for consistency
+        self.textHeight = TextMeasurementEngine.calculateHeight(
+            for: "",
+            font: font,
+            availableWidth: availableWidth
+        )
     }
     
     // MARK: - State Management
@@ -38,7 +46,7 @@ class InputBarState: ObservableObject {
     
     /// Update text height based on content
     func updateHeight(for newText: String) {
-        let font = NSFont(name: tokens.typography.bodyFont, size: 12) ?? NSFont.systemFont(ofSize: 12)
+        let font = NSFont(name: tokens.typography.bodyFont, size: CGFloat(tokens.elements.inputBar.fontSize)) ?? NSFont.systemFont(ofSize: CGFloat(tokens.elements.inputBar.fontSize))
         let contentWidth: CGFloat = tokens.layout.sizing["contentWidth"] ?? 592
         let availableWidth = contentWidth - (tokens.elements.inputBar.textPadding * 2)
         

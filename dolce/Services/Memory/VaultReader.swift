@@ -19,7 +19,7 @@ class VaultReader: VaultReading {
         do {
             return try String(contentsOfFile: fullPath, encoding: .utf8)
         } catch {
-            print("Failed to read file at \(fullPath): \(error)")
+            // Failed to read file - error will be propagated
             return nil
         }
     }
@@ -56,7 +56,7 @@ class VaultReader: VaultReading {
         do {
             return try JSONDecoder().decode(type, from: jsonData)
         } catch {
-            print("Failed to decode JSON at \(relativePath): \(error)")
+            // Failed to decode JSON - error will be propagated
             return nil
         }
     }

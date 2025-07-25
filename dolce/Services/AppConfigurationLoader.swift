@@ -16,10 +16,31 @@ import Foundation
 struct AppConfigurationLoader {
     
     private struct AppConfig: Codable {
-        let fileHandling: FileHandling
-        let conversation: Conversation
-        let defaults: Defaults
+        let api: APIConfig?
+        let fileSystem: FileSystemConfig?
+        let limits: LimitsConfig?
         let features: Features?
+        
+        // Legacy fields for backward compatibility
+        let fileHandling: FileHandling?
+        let conversation: Conversation?
+        let defaults: Defaults?
+        
+        struct APIConfig: Codable {
+            let defaultTimeout: Int
+            let streamTimeout: Int
+            let defaultTemperature: Double
+        }
+        
+        struct FileSystemConfig: Codable {
+            let paths: [String: String]
+            let files: [String: String]
+            let extensions: [String: String]
+        }
+        
+        struct LimitsConfig: Codable {
+            let defaultRecentTrims: Int
+        }
         
         struct FileHandling: Codable {
             let maxFileSizeMB: Int
@@ -72,38 +93,38 @@ struct AppConfigurationLoader {
     /// Get max file size in bytes
     static var maxFileSize: Int64 {
         let config = loadConfig()
-        let sizeMB = config?.fileHandling.maxFileSizeMB ?? 10
+        let sizeMB = config?.fileHandling?.maxFileSizeMB ?? 10
         return Int64(sizeMB * 1024 * 1024)
     }
     
     /// Get file preview character limit
     static var filePreviewCharLimit: Int {
-        return loadConfig()?.fileHandling.contentTruncation.filePreviewChars ?? 2000
+        return loadConfig()?.fileHandling?.contentTruncation.filePreviewChars ?? 2000
     }
     
     /// Get message content character limit
     static var messageContentCharLimit: Int {
-        return loadConfig()?.fileHandling.contentTruncation.messageContentChars ?? 3000
+        return loadConfig()?.fileHandling?.contentTruncation.messageContentChars ?? 3000
     }
     
     /// Get default persona
     static var defaultPersona: String {
-        return loadConfig()?.conversation.defaultPersona ?? "claude"
+        return loadConfig()?.conversation?.defaultPersona ?? "claude"
     }
     
     /// Get max conversation history length
     static var maxHistoryLength: Int {
-        return loadConfig()?.conversation.maxHistoryLength ?? 50
+        return loadConfig()?.conversation?.maxHistoryLength ?? 50
     }
     
     /// Get conversation temperature
     static var temperature: Double {
-        return loadConfig()?.conversation.temperature ?? 0.7
+        return loadConfig()?.conversation?.temperature ?? loadConfig()?.api?.defaultTemperature ?? 0.7
     }
     
     /// Get fallback provider
     static var fallbackProvider: String {
-        return loadConfig()?.defaults.fallbackProvider ?? "anthropic"
+        return loadConfig()?.defaults?.fallbackProvider ?? "anthropic"
     }
     
     /// Clear cached configuration

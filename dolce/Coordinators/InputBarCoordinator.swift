@@ -128,12 +128,11 @@ class InputBarCoordinator: ObservableObject {
                 
             } catch {
                 // Log error but continue with other files
-                print("Failed to read file: \(error)")
+                // Error reading file - silently continue
             }
             
-        case .failure(let error):
-            // Log validation error but continue
-            print("File validation failed: \(error)")
+        case .failure(_):
+            break // File validation failed - silently continue
         }
     }
     

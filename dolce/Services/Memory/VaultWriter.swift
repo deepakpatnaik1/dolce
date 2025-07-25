@@ -24,7 +24,7 @@ class VaultWriter: VaultWriting {
         do {
             try content.write(toFile: fullPath, atomically: true, encoding: .utf8)
         } catch {
-            print("Failed to write file at \(fullPath): \(error)")
+            // Failed to write file - error will be propagated
         }
     }
     
@@ -38,7 +38,7 @@ class VaultWriter: VaultWriting {
                 writeFile(content: jsonString, to: relativePath)
             }
         } catch {
-            print("Failed to encode JSON for \(relativePath): \(error)")
+            // Failed to encode JSON - error will be propagated
         }
     }
     
@@ -51,7 +51,7 @@ class VaultWriter: VaultWriting {
                     attributes: nil
                 )
             } catch {
-                print("Failed to create directory at \(path): \(error)")
+                // Failed to create directory - error will be propagated
             }
         }
     }
@@ -68,7 +68,7 @@ class VaultWriter: VaultWriting {
         do {
             try fileManager.removeItem(atPath: fullPath)
         } catch {
-            print("Failed to delete file at \(fullPath): \(error)")
+            // Failed to delete file - error will be propagated
         }
     }
 }

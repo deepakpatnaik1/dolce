@@ -27,9 +27,37 @@ struct ModelsConfiguration: Codable {
             let configuration = try JSONDecoder().decode(ModelsConfiguration.self, from: data)
             return configuration
         } catch {
-            fatalError("Failed to load models.json from vault at \(configPath): \(error)")
+            // Return default configuration if file cannot be loaded
+            return ModelsConfiguration.createDefault()
         }
     }()
+    
+    private static func createDefault() -> ModelsConfiguration {
+        // Return minimal default configuration to allow app to run
+        return ModelsConfiguration(
+            providers: [
+                "anthropic": ProviderConfiguration(
+                    name: "Anthropic",
+                    apiKeyIdentifier: "ANTHROPIC_API_KEY",
+                    baseURL: "https://api.anthropic.com",
+                    endpoint: "/v1/messages",
+                    authHeader: "x-api-key",
+                    authPrefix: nil,
+                    models: [
+                        ModelConfiguration(
+                            key: "claude-3-5-sonnet-20241022",
+                            displayName: "Claude 3.5 Sonnet",
+                            maxTokens: 8192,
+                            isLocal: false
+                        )
+                    ],
+                    additionalHeaders: [
+                        "anthropic-version": "2023-06-01"
+                    ]
+                )
+            ]
+        )
+    }
 }
 
 struct ProviderConfiguration: Codable {

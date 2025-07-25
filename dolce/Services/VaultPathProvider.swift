@@ -40,7 +40,15 @@ struct VaultPathProvider {
             }
         }
         
+        // Check environment variable
+        if let envPath = ProcessInfo.processInfo.environment["DOLCE_VAULT_PATH"] {
+            if FileManager.default.fileExists(atPath: envPath) {
+                return envPath
+            }
+        }
+        
         // Fallback to hardcoded path for development
+        // TODO: This is user-specific and should be removed for production
         let fallbackPath = "/Users/d.patnaik/code/dolce/dolceVault"
         if FileManager.default.fileExists(atPath: fallbackPath) {
             return fallbackPath

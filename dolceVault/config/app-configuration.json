@@ -1,18 +1,47 @@
 {
-  "fileHandling": {
-    "maxFileSizeMB": 10,
-    "contentTruncation": {
-      "filePreviewChars": 2000,
-      "messageContentChars": 3000
+  "api": {
+    "defaultTimeout": 120000,
+    "streamTimeout": 600000,
+    "defaultTemperature": 0.7,
+    "httpStatus": {
+      "success": {
+        "start": 200,
+        "end": 299
+      },
+      "clientError": {
+        "start": 400,
+        "end": 499
+      },
+      "serverError": {
+        "start": 500,
+        "end": 599
+      }
+    },
+    "headers": {
+      "contentType": "application/json"
     }
   },
-  "conversation": {
-    "defaultPersona": "claude",
-    "maxHistoryLength": 50,
-    "temperature": 0.7
+  "fileSystem": {
+    "paths": {
+      "journal": "journal",
+      "superjournal": "superjournal",
+      "personas": "playbook/personas",
+      "boss": "playbook/boss",
+      "tools": "playbook/tools",
+      "appState": ".app-state"
+    },
+    "files": {
+      "currentPersona": "currentPersona.md",
+      "scrollPosition": "scrollPosition.json",
+      "taxonomy": "taxonomy.json"
+    },
+    "extensions": {
+      "markdown": ".md",
+      "json": ".json"
+    }
   },
-  "defaults": {
-    "fallbackProvider": "anthropic"
+  "limits": {
+    "defaultRecentTrims": 10
   },
   "features": {
     "memorySystemEnabled": true

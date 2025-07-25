@@ -88,7 +88,7 @@ struct ContentView: View {
     let tokens = DesignTokens.shared
     return ContentView()
         .frame(
-            width: tokens.layout.sizing["windowWidth"] ?? 1000,
-            height: tokens.layout.sizing["windowHeight"] ?? 700
+            width: tokens.layout.sizing["windowWidth"]!,
+            height: tokens.layout.sizing["windowHeight"]!
         )
 }
