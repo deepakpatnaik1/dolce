@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BD1A5D8D2E333B3900864830 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = BD1A5D8C2E333B3900864830 /* Markdown */; };
 		BD207F042E31366B00E117DE /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = BD207F032E31366B00E117DE /* MarkdownUI */; };
 		BD98779D2E2F385C0066002A /* .env in Resources */ = {isa = PBXBuildFile; fileRef = BD98779C2E2F385C0066002A /* .env */; };
 /* End PBXBuildFile section */
@@ -30,6 +31,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BD207F042E31366B00E117DE /* MarkdownUI in Frameworks */,
+				BD1A5D8D2E333B3900864830 /* Markdown in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,6 +76,7 @@
 			name = dolce;
 			packageProductDependencies = (
 				BD207F032E31366B00E117DE /* MarkdownUI */,
+				BD1A5D8C2E333B3900864830 /* Markdown */,
 			);
 			productName = dolce;
 			productReference = BD9877602E2E6E7F0066002A /* dolce.app */;
@@ -105,6 +108,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				BD207F022E31366B00E117DE /* XCRemoteSwiftPackageReference "MarkdownUI" */,
+				BD1A5D8B2E333B3900864830 /* XCRemoteSwiftPackageReference "swift-markdown" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BD9877612E2E6E7F0066002A /* Products */;
@@ -330,6 +334,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		BD1A5D8B2E333B3900864830 /* XCRemoteSwiftPackageReference "swift-markdown" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-markdown";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.6.0;
+			};
+		};
 		BD207F022E31366B00E117DE /* XCRemoteSwiftPackageReference "MarkdownUI" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gonzalezreal/MarkdownUI";
@@ -341,6 +353,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		BD1A5D8C2E333B3900864830 /* Markdown */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD1A5D8B2E333B3900864830 /* XCRemoteSwiftPackageReference "swift-markdown" */;
+			productName = Markdown;
+		};
 		BD207F032E31366B00E117DE /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = BD207F022E31366B00E117DE /* XCRemoteSwiftPackageReference "MarkdownUI" */;
