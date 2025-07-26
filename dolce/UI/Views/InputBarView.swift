@@ -41,10 +41,6 @@ struct InputBarView: View {
                 animationCoordinator: coordinator.animationCoordinator
             )
         }
-        .onChange(of: state.text) { _, newValue in
-            state.updateHeight(for: newValue)
-            coordinator.handleTextChange(newValue)
-        }
     }
     
     // MARK: - Computed Properties for View Composition
@@ -58,12 +54,21 @@ struct InputBarView: View {
     
     private var textInputSection: some View {
         ZStack(alignment: .bottomLeading) {
-            TextField("", text: $state.text, axis: .vertical)
+            textInputComponent
+        }
+    }
+    
+    @ViewBuilder
+    private var textInputComponent: some View {
+        Group {
+            switch state.inputComponentType {
+            case .textField:
+                TextField("", text: $state.text, axis: .vertical)
                 .font(.custom(tokens.typography.bodyFont, size: CGFloat(tokens.elements.inputBar.fontSize)))
                 .foregroundColor(.white)
                 .focused($isInputFocused)
                 .textFieldStyle(PlainTextFieldStyle())
-                .frame(height: state.textHeight)
+                .frame(height: state.textHeight, alignment: state.textAlignment)
                 .padding(.horizontal, tokens.elements.inputBar.textPadding)
                 .padding(.top, tokens.elements.inputBar.topPadding)
                 .padding(.bottom, tokens.elements.inputBar.topPadding)
@@ -71,7 +76,10 @@ struct InputBarView: View {
                     // Disabled - handled by onKeyPress
                 }
                 .onKeyPress { keyPress in
-                    switch KeyboardCommandRouter.routeKeyPress(keyPress) {
+                    let context: KeyboardContext = state.journalModeState.isInJournalMode ? .journalMode : .normal
+                    let action = KeyboardCommandRouter.routeKeyPress(keyPress, context: context)
+                    
+                    switch action {
                     case .sendMessage:
                         Task {
                             await coordinator.handleSendAction(text: state.text, state: state)
@@ -80,12 +88,22 @@ struct InputBarView: View {
                     case .addNewLine:
                         // Let TextField handle naturally for new line
                         return .ignored
-                    case .turnNavigateUp, .turnNavigateDown, .turnModeExit:
-                        // Delegate turn navigation to coordinator
-                        return coordinator.handleKeyboardCommand(KeyboardCommandRouter.routeKeyPress(keyPress))
+                    case .turnNavigateUp, .turnNavigateDown, .turnModeExit, .journalModeExit:
+                        // Delegate navigation and mode exits to coordinator
+                        return coordinator.handleKeyboardCommand(action, state: state)
                     case .ignore:
                         return .ignored
                     }
+                }
+                .onChange(of: state.text) { oldValue, newValue in
+                    // Skip all processing in journal mode
+                    if state.journalModeState.isInJournalMode {
+                        return
+                    }
+                    
+                    // Normal mode: update height and handle text changes
+                    state.updateHeight(for: newValue)
+                    coordinator.handleTextChange(newValue, state: state)
                 }
                 .onChange(of: focusGuardian.shouldFocusInput) { _, should in
                     if should { 
@@ -97,6 +115,69 @@ struct InputBarView: View {
                         focusGuardian.inputDidReceiveFocus()
                     }
                 }
+                
+        case .textEditor:
+            TextEditor(text: $state.text)
+                .font(.custom(tokens.typography.bodyFont, size: CGFloat(tokens.elements.inputBar.fontSize)))
+                .foregroundColor(.white)
+                .focused($isInputFocused)
+                .scrollContentBackground(.hidden)
+                .background(Color.clear)
+                .frame(height: state.textHeight, alignment: state.textAlignment)
+                .padding(.horizontal, tokens.elements.inputBar.textPadding)
+                .padding(.top, tokens.elements.inputBar.topPadding)
+                .padding(.bottom, tokens.elements.inputBar.topPadding)
+                .onSubmit {
+                    // Disabled - handled by onKeyPress
+                }
+                .onKeyPress { keyPress in
+                    let context: KeyboardContext = state.journalModeState.isInJournalMode ? .journalMode : .normal
+                    let action = KeyboardCommandRouter.routeKeyPress(keyPress, context: context)
+                    
+                    switch action {
+                    case .sendMessage:
+                        Task {
+                            await coordinator.handleSendAction(text: state.text, state: state)
+                        }
+                        return .handled
+                    case .addNewLine:
+                        // Let TextEditor handle naturally for new line
+                        return .ignored
+                    case .turnNavigateUp, .turnNavigateDown, .turnModeExit, .journalModeExit:
+                        // Delegate navigation and mode exits to coordinator
+                        return coordinator.handleKeyboardCommand(action, state: state)
+                    case .ignore:
+                        return .ignored
+                    }
+                }
+                .onChange(of: state.text) { oldValue, newValue in
+                    // Skip all processing in journal mode
+                    if state.journalModeState.isInJournalMode {
+                        return
+                    }
+                    
+                    // Normal mode: update height and handle text changes
+                    state.updateHeight(for: newValue)
+                    coordinator.handleTextChange(newValue, state: state)
+                }
+                .onChange(of: focusGuardian.shouldFocusInput) { _, should in
+                    if should { 
+                        isInputFocused = true
+                    }
+                }
+                .onChange(of: isInputFocused) { _, focused in
+                    if focused { 
+                        focusGuardian.inputDidReceiveFocus()
+                    }
+                }
+            }
+        }
+        .id("inputField")  // Consistent identity across both components
+        .onChange(of: state.inputComponentType) { _, newType in
+            // Ensure focus is maintained when switching components
+            Task { @MainActor in
+                isInputFocused = true
+            }
         }
     }
     
