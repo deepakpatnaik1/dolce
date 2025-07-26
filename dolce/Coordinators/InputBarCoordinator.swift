@@ -326,7 +326,7 @@ class InputBarCoordinator: ObservableObject {
         let turns = TurnManager.shared.calculateTurns(from: currentMessages)
         
         // Execute deletion on files
-        let deletionResult = deletionService.deleteTurns(command: deleteCommand, from: currentMessages)
+        _ = deletionService.deleteTurns(command: deleteCommand, from: currentMessages)
         
         // Update UI to match file deletions
         switch deleteCommand.scope {
