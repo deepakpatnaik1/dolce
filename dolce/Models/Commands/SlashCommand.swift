@@ -15,6 +15,7 @@ import Foundation
 
 enum SlashCommand: String, CaseIterable {
     case journal = "/journal"
+    case delete = "/delete"
     
     /// Parse slash command from input text
     static func parse(from text: String) -> SlashCommand? {
