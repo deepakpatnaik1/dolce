@@ -70,4 +70,17 @@ class MessageStore: ObservableObject {
         messages.removeAll()
     }
     
+    /// Remove specific turns from messages
+    func removeTurns(_ turnsToRemove: [TurnManager.Turn]) {
+        let messageIdsToRemove = Set(turnsToRemove.flatMap { turn in
+            var ids = [turn.userMessage.id]
+            if let aiMessage = turn.aiMessage {
+                ids.append(aiMessage.id)
+            }
+            return ids
+        })
+        
+        messages.removeAll { messageIdsToRemove.contains($0.id) }
+    }
+    
 }
