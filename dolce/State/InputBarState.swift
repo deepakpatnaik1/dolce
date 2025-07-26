@@ -14,11 +14,18 @@
 import Foundation
 import SwiftUI
 
+enum InputComponentType {
+    case textField
+    case textEditor
+}
+
 @MainActor
 class InputBarState: ObservableObject {
     @Published var text: String = ""
     @Published var textHeight: CGFloat
     @Published var isFocused: Bool = false
+    @Published var journalModeState = JournalModeState()
+    @Published var textAlignment: Alignment = .center
     
     private let tokens = DesignTokens.shared
     private var debouncedCalculator: DebouncedHeightCalculator?
@@ -55,7 +62,10 @@ class InputBarState: ObservableObject {
     /// Clear input state after sending
     func clearInput() {
         text = ""
-        updateHeight(for: "")
+        // Only update height if not in journal mode
+        if !journalModeState.isInJournalMode {
+            updateHeight(for: "")
+        }
     }
     
     /// Update text height based on content
@@ -117,5 +127,10 @@ class InputBarState: ObservableObject {
     /// Get trimmed text content
     var trimmedText: String {
         text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+    /// Determine which input component to use based on mode
+    var inputComponentType: InputComponentType {
+        return journalModeState.isInJournalMode ? .textEditor : .textField
     }
 }
