@@ -20,13 +20,19 @@ enum KeyboardAction {
     case turnNavigateUp
     case turnNavigateDown
     case turnModeExit
+    case journalModeExit
     case ignore
+}
+
+enum KeyboardContext {
+    case normal
+    case journalMode
 }
 
 struct KeyboardCommandRouter {
     
     /// Route keyboard event to appropriate action
-    static func routeKeyPress(_ keyPress: KeyPress) -> KeyboardAction {
+    static func routeKeyPress(_ keyPress: KeyPress, context: KeyboardContext = .normal) -> KeyboardAction {
         switch (keyPress.key, keyPress.modifiers) {
         case (.return, []):           // Enter alone → send message
             return .sendMessage
@@ -36,8 +42,13 @@ struct KeyboardCommandRouter {
             return .turnNavigateUp
         case (.downArrow, let mods) where mods.contains(.option): // Option+Down → navigate to next turn
             return .turnNavigateDown
-        case (.escape, []):           // Escape → exit turn mode
-            return .turnModeExit
+        case (.escape, []):           // Escape → check context
+            switch context {
+            case .journalMode:
+                return .journalModeExit
+            default:
+                return .turnModeExit
+            }
         default:
             return .ignore
         }

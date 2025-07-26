@@ -26,6 +26,9 @@ class InputBarCoordinator: ObservableObject {
     let debouncedHeightCalculator = DebouncedHeightCalculator()
     let animationCoordinator = AnimationCoordinator()
     
+    // Journal mode service
+    private let journalModeManager = JournalModeManager()
+    
     init(conversationOrchestrator: ConversationOrchestrator, 
          fileDropHandler: FileDropHandler,
          messageStore: MessageStore) {
@@ -77,6 +80,20 @@ class InputBarCoordinator: ObservableObject {
         // Clear UI state
         state.clearInput()
         fileDropHandler.clearFiles()
+        
+        // Handle journal mode exit if active
+        if state.journalModeState.isInJournalMode {
+            // Restore previous persona after sending journal entry
+            if let previousPersona = state.journalModeState.previousPersona {
+                PersonaSessionManager.shared.setCurrentPersona(previousPersona)
+            }
+            
+            // Clear journal mode state
+            state.journalModeState = journalModeManager.createExitedState()
+            
+            // Restore text alignment to center
+            state.textAlignment = .center
+        }
         
         // Send message with detected or current persona
         await conversationOrchestrator.sendMessageWithAttachments(
@@ -143,7 +160,7 @@ class InputBarCoordinator: ObservableObject {
     // MARK: - Keyboard Command Handling
     
     /// Handle keyboard commands from input bar
-    func handleKeyboardCommand(_ action: KeyboardAction) -> KeyPress.Result {
+    func handleKeyboardCommand(_ action: KeyboardAction, state: InputBarState) -> KeyPress.Result {
         switch action {
         case .turnNavigateUp:
             turnModeCoordinator.handleKeyboardCommand(.navigateUp, messages: messageStore.messages)
@@ -154,6 +171,38 @@ class InputBarCoordinator: ObservableObject {
         case .turnModeExit:
             turnModeCoordinator.handleKeyboardCommand(.exitTurnMode, messages: messageStore.messages)
             return .handled
+        case .journalModeExit:
+            // Validate exit conditions
+            guard state.journalModeState.isInJournalMode else { return .ignored }
+            guard journalModeManager.canExitJournalMode(text: state.text) else { return .ignored }
+            
+            Task { @MainActor in
+                // Restore original height
+                let originalHeight = state.journalModeState.originalHeight
+                
+                // Animate back to original height using existing services
+                HeightAnimationEngine.animateHeightChange(
+                    from: state.textHeight,
+                    to: originalHeight,
+                    animationId: UUID(),
+                    coordinator: animationCoordinator
+                ) { height in
+                    state.textHeight = height
+                }
+                
+                // Restore previous persona if stored
+                if let previousPersona = state.journalModeState.previousPersona {
+                    PersonaSessionManager.shared.setCurrentPersona(previousPersona)
+                }
+                
+                // Clear journal mode state
+                state.journalModeState = journalModeManager.createExitedState()
+                
+                // Restore text alignment to center
+                state.textAlignment = .center
+            }
+            
+            return .handled
         default:
             return .ignored
         }
@@ -162,7 +211,54 @@ class InputBarCoordinator: ObservableObject {
     // MARK: - Persona Detection and Model Switching
     
     /// Handle text changes to detect persona and switch models
-    func handleTextChange(_ text: String) {
+    func handleTextChange(_ text: String, state: InputBarState) {
+        // Check for slash commands first
+        if let command = SlashCommandParser.shouldExecuteCommand(in: text) {
+            switch command {
+            case .journal:
+                // Validate entry
+                guard journalModeManager.canEnterJournalMode() else { return }
+                
+                Task { @MainActor in
+                    // Store current state
+                    let currentHeight = state.textHeight
+                    let currentPersona = PersonaSessionManager.shared.getCurrentPersona()
+                    
+                    // Cancel any pending height calculations
+                    debouncedHeightCalculator.cancelPendingCalculations()
+                    
+                    // Create journal mode state
+                    state.journalModeState = journalModeManager.createEnteringState(
+                        originalHeight: currentHeight,
+                        previousPersona: currentPersona
+                    )
+                    
+                    // Switch to Eva persona
+                    PersonaSessionManager.shared.setCurrentPersona("eva")
+                    
+                    // Set text alignment to top for journal mode
+                    state.textAlignment = .top
+                    
+                    // Calculate maximum height using existing service
+                    let maxHeight = TextMeasurementEngine.calculateMaximumTextHeight()
+                    
+                    // Clear the /journal command from input
+                    state.text = ""
+                    
+                    // Animate to maximum height using existing services
+                    HeightAnimationEngine.animateHeightChange(
+                        from: currentHeight,
+                        to: maxHeight,
+                        animationId: UUID(),
+                        coordinator: animationCoordinator
+                    ) { height in
+                        state.textHeight = height
+                    }
+                }
+            }
+            return
+        }
+        
         // Try instant persona detection for model switching
         if let persona = PersonaDetector.detectPersonaForSwitching(from: text) {
             // Update session immediately
