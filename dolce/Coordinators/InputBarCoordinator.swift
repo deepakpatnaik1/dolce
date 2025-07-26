@@ -47,6 +47,23 @@ class InputBarCoordinator: ObservableObject {
         
         guard hasText || hasFiles else { return }
         
+        // Check for delete command
+        if let slashCommand = SlashCommandParser.parseCommand(from: trimmedText) {
+            switch slashCommand {
+            case .delete:
+                // Handle delete command
+                let commandText = SlashCommand.extractText(from: trimmedText, command: .delete)
+                handleDeleteCommand(commandText)
+                
+                // Clear input and return (don't send as a message)
+                state.clearInput()
+                return
+            case .journal:
+                // Journal is handled in handleTextChange
+                break
+            }
+        }
+        
         // Detect persona from message
         var finalText = trimmedText
         var targetPersona: String
@@ -255,6 +272,9 @@ class InputBarCoordinator: ObservableObject {
                         state.textHeight = height
                     }
                 }
+            case .delete:
+                // Don't execute immediately - wait for full command
+                return
             }
             return
         }
@@ -287,6 +307,37 @@ class InputBarCoordinator: ObservableObject {
         }
         
         runtimeModelManager.selectedModel = modelWithPrefix
+    }
+    
+    /// Handle delete command execution
+    private func handleDeleteCommand(_ commandText: String) {
+        // Parse the delete command
+        guard let deleteCommand = DeleteCommandParser.parse(commandText: commandText) else {
+            // Invalid syntax - do nothing silently
+            return
+        }
+        
+        // Get vault path from existing provider
+        let vaultPath = VaultPathProvider.vaultPath
+        let deletionService = TurnDeletionService(vaultPath: vaultPath)
+        
+        // Get current messages
+        let currentMessages = messageStore.messages
+        let turns = TurnManager.shared.calculateTurns(from: currentMessages)
+        
+        // Execute deletion on files
+        let deletionResult = deletionService.deleteTurns(command: deleteCommand, from: currentMessages)
+        
+        // Update UI to match file deletions
+        switch deleteCommand.scope {
+        case .allTurns:
+            // Use existing clearMessages method
+            messageStore.clearMessages()
+        case .lastTurns(let count):
+            // Remove specific turns
+            let turnsToRemove = Array(turns.suffix(count))
+            messageStore.removeTurns(turnsToRemove)
+        }
     }
     
 }
