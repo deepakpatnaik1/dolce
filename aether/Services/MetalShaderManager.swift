@@ -44,7 +44,7 @@ class MetalShaderManager {
     /// Create an empty Metal library to satisfy system requirements
     func createEmptyMetalLibrary() -> URL? {
         guard device != nil else {
-            logger.info("Metal device not available")
+            // Metal device not available - silent return
             return nil
         }
         
@@ -70,26 +70,26 @@ class MetalShaderManager {
             setenv("METAL_DEVICE_WRAPPER_TYPE", "0", 1)
         }
         
-        logger.info("Metal warnings suppressed")
+        // Warnings suppressed silently
     }
     
     /// Validate Metal support on the system
     @discardableResult
     func validateMetalSupport() -> Bool {
-        guard let device = device else {
+        guard device != nil else {
             logger.warning("Metal is not supported on this system")
             return false
         }
         
-        logger.info("Metal device available: \(device.name)")
+        // Device check passed silently
         
         // Check if shader library exists
         if let libraryURL = createEmptyMetalLibrary(),
            FileManager.default.fileExists(atPath: libraryURL.path) {
-            logger.info("Metal shader library found at: \(libraryURL.path)")
+            // Library found silently
             return true
         } else {
-            logger.info("Metal shader library not found, will be created at build time")
+            // Library will be created at build time
             return true // Still valid, library will be created
         }
     }
