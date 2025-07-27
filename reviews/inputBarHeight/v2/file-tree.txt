@@ -1,0 +1,14 @@
+InputBar Height Constraint - Attempt #2 File Tree
+
+NEW FILES (Atomic LEGO Components):
+- aether/Models/UI/InputBarHeightConstraints.swift
+- aether/Services/InputBarHeightManager.swift  
+- aether/UI/Components/ConstrainedInputBar.swift
+- aether/State/InputBarState.swift
+
+MODIFIED FILES:
+- aether/UI/Views/InputBarView.swift (added .constrainedInputBar modifier)
+- aetherVault/config/design-tokens.json (added maxHeight: 300)
+
+COORDINATOR:
+- aether/Coordinators/InputBarCoordinator.swift (existing, handles orchestration)

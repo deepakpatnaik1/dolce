@@ -1,0 +1,27 @@
+{
+  "defaultModel": "anthropic:claude-sonnet-4-20250514",
+  "providers": {
+    "anthropic": {
+      "name": "Anthropic",
+      "apiKeyIdentifier": "ANTHROPIC_API_KEY",
+      "baseURL": "https://api.anthropic.com/v1",
+      "endpoint": "/messages",
+      "authHeader": "x-api-key",
+      "models": [
+        {
+          "key": "claude-opus-4-20250514",
+          "displayName": "claude-opus-4-20250514",
+          "maxTokens": 4000
+        },
+        {
+          "key": "claude-sonnet-4-20250514",
+          "displayName": "claude-sonnet-4-20250514",
+          "maxTokens": 4000
+        }
+      ],
+      "additionalHeaders": {
+        "anthropic-version": "2023-06-01"
+      }
+    }
+  }
+}

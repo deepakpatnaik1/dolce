@@ -1,7 +1,19 @@
 {
   "typography": {
     "bodyFont": "iA Writer Quattro V",
-    "codeFont": "Menlo"
+    "codeFont": "Menlo",
+    "fontSize": {
+      "xs": 9,
+      "sm": 10,
+      "md": 11,
+      "base": 12,
+      "lg": 14,
+      "xl": 15,
+      "xxl": 16,
+      "xxxl": 18,
+      "display": 20,
+      "giant": 64
+    }
   },
   "layout": {
     "padding": {
@@ -68,7 +80,8 @@
       "topPadding": 12,
       "bottomPadding": 12,
       "minHeight": 22,
-      "maxVisibleLines": 64,
+      "maxHeight": 300,
+      "lineHeight": 17,
       "placeholderText": "Ask anything...",
       "fontSize": 12,
       "placeholderPaddingHorizontal": 20,
@@ -171,6 +184,34 @@
       "red": 0.04,
       "green": 0.04,
       "blue": 0.05
+    }
+  },
+  "opacity": {
+    "text": {
+      "primary": 1.0,
+      "secondary": 0.9,
+      "tertiary": 0.85,
+      "quaternary": 0.8,
+      "muted": 0.6,
+      "emphasis": 0.95
+    },
+    "background": {
+      "strong": 0.9,
+      "medium": 0.6,
+      "subtle": 0.3,
+      "faint": 0.1,
+      "ghost": 0.05
+    },
+    "border": {
+      "strong": 0.5,
+      "medium": 0.3,
+      "subtle": 0.2,
+      "faint": 0.1
+    },
+    "shadow": {
+      "strong": 0.4,
+      "medium": 0.3,
+      "subtle": 0.2
     }
   }
 }
