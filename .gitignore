@@ -39,7 +39,7 @@ Temporary Items
 .env.production
 
 # Old codebase - exclude from new project
-aether/
+# aether/ - REMOVED: This was blocking the actual source code from git
 
 # Keep aetherVault - it contains important blueprints and documentation
 # aetherVault/ - NOT ignored, keep this backed up
