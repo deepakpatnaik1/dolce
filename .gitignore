@@ -41,5 +41,5 @@ Temporary Items
 # Old codebase - exclude from new project
 aether/
 
-# Keep dolceVault - it contains important blueprints and documentation
-# dolceVault/ - NOT ignored, keep this backed up
+# Keep aetherVault - it contains important blueprints and documentation
+# aetherVault/ - NOT ignored, keep this backed up
