@@ -118,6 +118,7 @@ struct DesignTokens: Codable {
             let bodyFontSize: Double
             let authorFontSize: Double
             let fallbackColor: ColorData
+            let turnModeScrollOffset: Double
             let highlight: Highlight
             let authorLabel: AuthorLabel
             
@@ -372,6 +373,7 @@ struct DesignTokens: Codable {
                     bodyFontSize: 12,
                     authorFontSize: 10,
                     fallbackColor: Elements.Scrollback.ColorData(red: 0.3, green: 0.5, blue: 0.8),
+                    turnModeScrollOffset: 0.03,
                     highlight: Elements.Scrollback.Highlight(
                         fillOpacity: 0.03,
                         borderOpacityMultiplier: 0.5,

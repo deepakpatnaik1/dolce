@@ -26,7 +26,7 @@ struct ScrollbackView: View {
     
     // Computed property to trigger scroll on any change
     private var scrollTrigger: String {
-        "\(displayMessages.count)-\(displayMessages.last?.content ?? "")"
+        "\(displayMessages.count)-\(displayMessages.last?.content ?? "")-\(turnManager.currentTurnIndex)"
     }
     
     var body: some View {
@@ -61,11 +61,20 @@ struct ScrollbackView: View {
             .frame(width: tokens.layout.sizing["contentWidth"] ?? 592)
             .scrollIndicators(.hidden)
             .onChange(of: scrollTrigger) {
-                // Scroll to bottom when messages change
                 // Small delay to ensure layout updates complete
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     withAnimation(.easeOut(duration: 0.3)) {
-                        proxy.scrollTo(bottomID, anchor: .bottom)
+                        if turnManager.isInTurnMode && !displayMessages.isEmpty {
+                            // In turn mode: scroll to the first message of the turn
+                            // The scroll offset compensates for the container's top padding (20pt)
+                            // Using 0.03 (3% of viewport height) works perfectly for typical window sizes
+                            // Calculation: 20pt padding / ~700pt viewport height ≈ 0.03
+                            let scrollOffset = tokens.elements.scrollback.turnModeScrollOffset
+                            proxy.scrollTo(displayMessages.first?.id, anchor: UnitPoint(x: 0, y: scrollOffset))
+                        } else {
+                            // Normal mode: scroll to bottom
+                            proxy.scrollTo(bottomID, anchor: .bottom)
+                        }
                     }
                 }
             }

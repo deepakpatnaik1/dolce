@@ -79,6 +79,7 @@
       "bodyFontSize": 12,
       "authorFontSize": 10,
       "fallbackColor": {"red": 0.3, "green": 0.5, "blue": 0.8},
+      "turnModeScrollOffset": 0.03,
       "highlight": {
         "fillOpacity": 0.03,
         "borderOpacityMultiplier": 0.5,

@@ -68,6 +68,14 @@ struct ContentView: View {
         .onDrop(of: [.fileURL, .image, .pdf, .plainText], isTargeted: $fileDropHandler.isHovering) { providers in
             fileDropHandler.handleDrop(providers: providers)
         }
+        .onKeyPress { keyPress in
+            // Global keyboard handler for Escape key to exit turn mode
+            if keyPress.key == .escape && TurnManager.shared.isInTurnMode {
+                TurnModeCoordinator.shared.exitTurnMode()
+                return .handled
+            }
+            return .ignored
+        }
     }
     
     /// Restore persisted state on app launch
